@@ -3,6 +3,7 @@ import PageHeader from '../components/PageHeader';
 import DocumentCard from '../components/DocumentCard';
 import { documentsData } from '../data/documentsData';
 import { useState } from 'react';
+import Head from 'next/head';
 
 export default function Documents() {
   // State for category filter
@@ -29,150 +30,129 @@ export default function Documents() {
     { id: 'additional', name: 'Дополнительные' }
   ];
 
+  // UI компонента
   return (
-    <Layout title="Документы">
+    <Layout>
+      <Head>
+        <title>Документы | Арктическая олимпиада</title>
+        <meta 
+          name="description" 
+          content="Официальные документы, положения и методические материалы Арктической олимпиады «Полярный круг»"
+        />
+      </Head>
+      
       <PageHeader 
-        title="Документы" 
-        subtitle="Официальные документы, регламентирующие проведение Арктической олимпиады «Полярный круг»"
+        title="Официальные документы" 
+        subtitle="Положения, регламенты и информационные материалы Арктической олимпиады «Полярный круг»"
       />
       
-      {/* Волновой эффект */}
-      <div className="document-wave-container">
-        <div className="document-wave"></div>
-      </div>
-      
-      <div className="container py-5">
+      <div className="container mb-5">
         <div className="row">
-          <div className="col-lg-10 mx-auto">
-            <div className="mb-5">
-              <p className="lead text-center mb-5">
-                На этой странице собраны все официальные документы, регламентирующие проведение 
-                Арктической олимпиады «Полярный круг» 2025.
-              </p>
-              
-              {/* Filter tabs */}
-              <div className="documents-filter mb-5">
-                <div className="filter-tabs">
-                  {categories.map(category => (
-                    <button
-                      key={category.id}
-                      className={`filter-tab ${activeCategory === category.id ? 'active' : ''}`}
-                      onClick={() => setActiveCategory(category.id)}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
+          <div className="col-lg-9 mx-auto">
+            {/* Диагностика */}
+            {error && (
+              <div className="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                <strong>Ошибка загрузки данных!</strong> {error}
+                <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            )}
+
+            {/* Фильтры категорий */}
+            <div className="mb-5 fade-in">
+              <div className="filters-container">
+                <button 
+                  className={`filter-btn ${activeCategory === 'all' ? 'active' : ''}`}
+                  onClick={() => setActiveCategory('all')}
+                >
+                  Все документы
+                </button>
+                <button 
+                  className={`filter-btn ${activeCategory === 'main' ? 'active' : ''}`}
+                  onClick={() => setActiveCategory('main')}
+                >
+                  Основные
+                </button>
+                <button 
+                  className={`filter-btn ${activeCategory === 'subjects' ? 'active' : ''}`}
+                  onClick={() => setActiveCategory('subjects')}
+                >
+                  По предметам
+                </button>
+                <button 
+                  className={`filter-btn ${activeCategory === 'official' ? 'active' : ''}`}
+                  onClick={() => setActiveCategory('official')}
+                >
+                  Официальные
+                </button>
+                <button 
+                  className={`filter-btn ${activeCategory === 'additional' ? 'active' : ''}`}
+                  onClick={() => setActiveCategory('additional')}
+                >
+                  Дополнительные
+                </button>
               </div>
             </div>
-            
-            {/* Document Grid */}
-            <div className="document-grid">
-              {activeCategory === 'all' && (
-                <>
-                  {/* Official documents */}
-                  {officialDocs.length > 0 && (
-                    <section className="mb-5">
-                      <h2 className="document-section-title mb-4">Официальные документы</h2>
-                      <div className="row g-4">
-                        {officialDocs.map(doc => (
-                          <div key={doc.id} className="col-md-6">
-                            <DocumentCard 
-                              title={doc.title}
-                              description={doc.description}
-                              url={doc.url}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                  
-                  {/* Main olympiad documents */}
-                  {mainDocs.length > 0 && (
-                    <section className="mb-5">
-                      <h2 className="document-section-title mb-4">Основные документы олимпиады</h2>
-                      <div className="row g-4">
-                        {mainDocs.map(doc => (
-                          <div key={doc.id} className="col-md-6">
-                            <DocumentCard 
-                              title={doc.title}
-                              description={doc.description}
-                              url={doc.url}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                  
-                  {/* Subject-specific documents */}
-                  {subjectDocs.length > 0 && (
-                    <section className="mb-5">
-                      <h2 className="document-section-title mb-4">Документы по предметам</h2>
-                      <div className="row g-4">
-                        {subjectDocs.map(doc => (
-                          <div key={doc.id} className="col-md-6">
-                            <DocumentCard 
-                              title={doc.title}
-                              description={doc.description}
-                              url={doc.url}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                  
-                  {/* Additional documents */}
-                  {additionalDocs.length > 0 && (
-                    <section className="mb-5">
-                      <h2 className="document-section-title mb-4">Дополнительные документы</h2>
-                      <div className="row g-4">
-                        {additionalDocs.map(doc => (
-                          <div key={doc.id} className="col-md-6">
-                            <DocumentCard 
-                              title={doc.title}
-                              description={doc.description}
-                              url={doc.url}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-                </>
-              )}
-              
-              {/* Filtered documents */}
-              {activeCategory !== 'all' && (
-                <div className="row g-4">
-                  {getFilteredDocs().map(doc => (
-                    <div key={doc.id} className="col-md-6">
-                      <DocumentCard 
+
+            {/* Загрузка и отображение документов */}
+            {loading ? (
+              <div className="text-center py-5 fade-in">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Загрузка...</span>
+                </div>
+                <p className="mt-3">Загрузка документов...</p>
+              </div>
+            ) : (
+              <div className="fade-in">
+                <h2 className="side-bordered-header mb-4">
+                  {getCategoryTitle(activeCategory)}
+                  <span className="badge bg-primary rounded-pill ms-3 fs-6">{getFilteredDocs().length}</span>
+                </h2>
+                
+                {getFilteredDocs().length > 0 ? (
+                  <div className="documents-grid">
+                    {getFilteredDocs().map((doc) => (
+                      <DocumentCard
+                        key={doc.id}
                         title={doc.title}
                         description={doc.description}
                         url={doc.url}
+                        category={doc.category}
                       />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="card shadow-custom border-0 bg-light p-4 text-center">
+                    <div className="card-body p-5">
+                      <i className="bi bi-file-earmark-text text-muted mb-3" style={{ fontSize: '3rem' }}></i>
+                      <h3 className="h4 mb-3">Документы не найдены</h3>
+                      <p className="text-muted mb-4">
+                        В выбранной категории пока нет документов.
+                      </p>
+                      <button 
+                        className="btn btn-outline-primary"
+                        onClick={() => setActiveCategory('all')}
+                      >
+                        Показать все документы
+                      </button>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
             
-            {/* Help notice */}
-            <div className="document-help-box mt-5">
-              <div className="d-flex">
-                <div className="help-icon">
-                  <i className="bi bi-info-circle-fill"></i>
+            {/* Информация о документах */}
+            <div className="alert alert-info mt-5 mb-0 border-0 shadow-sm rounded-4 fade-in" style={{animationDelay: "0.4s"}}>
+              <div className="d-flex py-2">
+                <div className="me-4">
+                  <i className="bi bi-info-circle-fill fs-3"></i>
                 </div>
                 <div>
-                  <h5>Не нашли нужный документ?</h5>
+                  <h5 className="alert-heading mb-2">Информация о документах</h5>
                   <p className="mb-0">
-                    Если вы не нашли нужный документ или у вас возникли вопросы, 
-                    пожалуйста, напишите нам на почту{' '}
-                    <a href="mailto:info@arctic-olymp.ru" className="help-link">
-                      info@arctic-olymp.ru
+                    Все официальные документы Арктической олимпиады «Полярный круг» представлены в формате PDF. 
+                    Если у вас возникли вопросы по документам, пожалуйста, свяжитесь с нами по адресу{' '}
+                    <a href="mailto:docs@arctic-olymp.ru" className="alert-link">
+                      docs@arctic-olymp.ru
                     </a>
                   </p>
                 </div>

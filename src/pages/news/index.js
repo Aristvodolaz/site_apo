@@ -1,33 +1,107 @@
 import Layout from '../../components/Layout';
 import PageHeader from '../../components/PageHeader';
 import NewsCard from '../../components/NewsCard';
-import { newsData } from '../../data/newsData';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { getNews } from '../../lib/dataService';
 
 export default function News() {
   // State for year filter
   const [activeYear, setActiveYear] = useState('all');
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Сортируем новости по дате (сначала новые)
-  const sortedNews = [...newsData].sort((a, b) => new Date(b.date) - new Date(a.date));
-  
-  // Разделяем новости на главную и остальные
-  const [mainNews, ...otherNews] = sortedNews;
+  // Fetch news data
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const newsData = await getNews();
+        // Ensure we have an array and sort by date
+        const sortedNews = Array.isArray(newsData) 
+          ? [...newsData].sort((a, b) => new Date(b.date) - new Date(a.date))
+          : [];
+        setNews(sortedNews);
+      } catch (err) {
+        console.error('Error fetching news:', err);
+        setError('Не удалось загрузить новости');
+        setNews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
   
   // Получаем уникальные годы из новостей
   const getYears = () => {
-    const years = sortedNews.map(news => new Date(news.date).getFullYear());
+    const years = news.map(item => new Date(item.date).getFullYear());
     return ['all', ...new Set(years)];
   };
   
   // Фильтруем новости по году
   const getFilteredNews = () => {
-    if (activeYear === 'all') return otherNews;
-    return otherNews.filter(news => new Date(news.date).getFullYear() === parseInt(activeYear));
+    if (activeYear === 'all') return news.slice(1);
+    return news.filter(item => 
+      new Date(item.date).getFullYear() === parseInt(activeYear)
+    );
   };
 
-  // Форматируем дату главной новости
+  if (loading) {
+    return (
+      <Layout title="Новости">
+        <PageHeader 
+          title="Новости олимпиады" 
+          subtitle="Актуальные новости и объявления Арктической олимпиады «Полярный круг»"
+        />
+        <div className="container py-5">
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Загрузка...</span>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout title="Новости">
+        <PageHeader 
+          title="Новости олимпиады" 
+          subtitle="Актуальные новости и объявления Арктической олимпиады «Полярный круг»"
+        />
+        <div className="container py-5">
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (news.length === 0) {
+    return (
+      <Layout title="Новости">
+        <PageHeader 
+          title="Новости олимпиады" 
+          subtitle="Актуальные новости и объявления Арктической олимпиады «Полярный круг»"
+        />
+        <div className="container py-5">
+          <div className="alert alert-info" role="alert">
+            Новости пока отсутствуют
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Get the main (latest) news
+  const mainNews = news[0];
+  
+  // Format the main news date
   const mainNewsDate = new Date(mainNews.date).toLocaleDateString('ru-RU', {
     day: 'numeric',
     month: 'long',
@@ -70,11 +144,9 @@ export default function News() {
                     <h2 className="featured-news-title mb-4">{mainNews.title}</h2>
                     <p className="featured-news-summary mb-4">{mainNews.summary}</p>
                     <div className="featured-news-link-container">
-                      <Link href={mainNews.link} legacyBehavior>
-                        <a className="featured-news-link">
+                      <Link href={`/news/${mainNews.id}`} className="featured-news-link">
                           Читать подробнее
                           <i className="bi bi-arrow-right ms-2"></i>
-                        </a>
                       </Link>
                     </div>
                   </div>
@@ -117,7 +189,7 @@ export default function News() {
                   title={newsItem.title}
                   date={newsItem.date}
                   summary={newsItem.summary}
-                  link={newsItem.link}
+                  link={`/news/${newsItem.id}`}
                 />
               </div>
             ))}

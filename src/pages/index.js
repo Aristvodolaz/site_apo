@@ -1,10 +1,11 @@
+import Head from 'next/head';
 import Layout from '../components/Layout';
 import NewsCard from '../components/NewsCard';
 import SubjectCard from '../components/SubjectCard';
 import Link from 'next/link';
-import { newsData } from '../data/newsData';
 import { subjectsData } from '../data/subjectsData';
 import { useEffect, useState } from 'react';
+import { getNews } from '../lib/dataService';
 
 export default function Home() {
   // Statistics data
@@ -18,10 +19,29 @@ export default function Home() {
   // Состояние для эффекта параллакса
   const [offsetY, setOffsetY] = useState(0);
   const handleScroll = () => setOffsetY(window.pageYOffset);
+
+  // Состояние для новостей
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   // Инициализируем эффект при монтировании компонента
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
+    
+    // Загружаем новости
+    const fetchNews = async () => {
+      try {
+        const newsData = await getNews();
+        setNews(Array.isArray(newsData) ? newsData : []);
+      } catch (err) {
+        console.error('Error fetching news:', err);
+        setNews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -202,18 +222,30 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="row g-4">
-            {newsData.slice(0, 3).map((newsItem) => (
-              <div key={newsItem.id} className="col-md-4">
-                <NewsCard
-                  title={newsItem.title}
-                  date={newsItem.date}
-                  summary={newsItem.summary}
-                  link={newsItem.link}
-                />
+          {loading ? (
+            <div className="d-flex justify-content-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Загрузка...</span>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : news.length > 0 ? (
+            <div className="row g-4">
+              {news.slice(0, 3).map((newsItem) => (
+                <div key={newsItem.id} className="col-md-4">
+                  <NewsCard
+                    title={newsItem.title}
+                    date={newsItem.date}
+                    summary={newsItem.summary}
+                    link={`/news/${newsItem.id}`}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="alert alert-info">
+              Новости пока отсутствуют
+            </div>
+          )}
         </div>
       </section>
 

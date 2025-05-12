@@ -1,21 +1,70 @@
 import Layout from '../../components/Layout';
 import PageHeader from '../../components/PageHeader';
 import Link from 'next/link';
-import { newsData } from '../../data/newsData';
 import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import { getDocument, getNews } from '../../lib/dataService';
 
 export default function NewsArticle() {
   const router = useRouter();
   const { slug } = router.query;
   
-  // Find the news article based on the URL
-  const newsItem = newsData.find(item => {
-    const itemSlug = item.link.split('/').pop();
-    return itemSlug === slug;
-  });
+  const [newsItem, setNewsItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // If article not found, show error message
-  if (!newsItem) {
+  useEffect(() => {
+    const fetchNewsItem = async () => {
+      if (!slug) return;
+
+      try {
+        const news = await getDocument('news', slug);
+        if (news) {
+          setNewsItem(news);
+        } else {
+          setError('Новость не найдена');
+        }
+      } catch (err) {
+        console.error('Error fetching news:', err);
+        setError('Ошибка при загрузке новости');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNewsItem();
+  }, [slug]);
+
+  // Handle fallback state
+  if (router.isFallback) {
+    return (
+      <Layout title="Загрузка...">
+        <div className="container py-5">
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Загрузка...</span>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (loading) {
+    return (
+      <Layout title="Загрузка...">
+        <div className="container py-5">
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Загрузка...</span>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !newsItem) {
     return (
       <Layout title="Новость не найдена">
         <PageHeader 
@@ -25,8 +74,8 @@ export default function NewsArticle() {
         <div className="container py-5">
           <div className="text-center">
             <p className="lead mb-4">К сожалению, запрашиваемая новость не найдена.</p>
-            <Link href="/news" legacyBehavior>
-              <a className="btn btn-primary">Вернуться к списку новостей</a>
+            <Link href="/news" className="btn btn-primary">
+              Вернуться к списку новостей
             </Link>
           </div>
         </div>
@@ -60,11 +109,9 @@ export default function NewsArticle() {
               
               <div className="mt-5 pt-4 border-top">
                 <div className="d-flex justify-content-between align-items-center">
-                  <Link href="/news" legacyBehavior>
-                    <a className="btn btn-outline-primary">
+                  <Link href="/news" className="btn btn-outline-primary">
                       <i className="bi bi-arrow-left me-2"></i>
                       Все новости
-                    </a>
                   </Link>
                   
                   <div className="share-buttons">
@@ -96,19 +143,59 @@ export default function NewsArticle() {
 
 // Generate static paths for all news articles
 export async function getStaticPaths() {
-  const paths = newsData.map(item => ({
-    params: { slug: item.link.split('/').pop() }
+  try {
+    // Fetch all news items from Firebase
+    const news = await getNews();
+    
+    // Generate paths from news IDs, ensuring slug is a string
+    const paths = news.map(item => ({
+      params: { slug: String(item.id) }
   }));
 
   return {
     paths,
-    fallback: false
+      fallback: true // Enable fallback for new content
+    };
+  } catch (error) {
+    console.error('Error generating static paths:', error);
+    return {
+      paths: [],
+      fallback: true // Enable fallback even if initial fetch fails
   };
+  }
 }
 
 // Get static props for each news article
 export async function getStaticProps({ params }) {
+  try {
+    // Ensure slug is a string and fetch the specific news item
+    const slug = String(params.slug);
+    const newsItem = await getDocument('news', slug);
+    
+    if (!newsItem) {
+      return {
+        notFound: true // This will show 404 page
+      };
+    }
+
+    // Convert Firestore Timestamp to ISO string for serialization
+    const serializedNewsItem = {
+      ...newsItem,
+      updated_at: newsItem.updated_at ? newsItem.updated_at.toDate().toISOString() : null,
+      created_at: newsItem.created_at ? newsItem.created_at.toDate().toISOString() : null,
+      date: newsItem.date ? new Date(newsItem.date).toISOString() : null
+    };
+
+    return {
+      props: {
+        newsItem: serializedNewsItem
+      },
+      revalidate: 60 // Revalidate every 60 seconds
+    };
+  } catch (error) {
+    console.error('Error fetching news item:', error);
   return {
-    props: {}
+      notFound: true
   };
+  }
 } 
