@@ -1,21 +1,48 @@
-# Base on official Node.js Alpine image
-FROM node:18-alpine
-
-# Set working directory
+# Stage 1: Dependencies
+FROM node:18-alpine AS deps
 WORKDIR /app
 
-# Copy package.json and package-lock.json before other files
-# Utilize Docker cache to save time if dependencies haven't changed
-COPY package*.json ./
+# Copy package files
+COPY package.json ./
 
-# Install dependencies
+# Install dependencies with only production dependencies
+RUN npm install --only=production
+
+# Stage 2: Builder
+FROM node:18-alpine AS builder
+WORKDIR /app
+
+# Copy package files
+COPY package.json ./
+
+# Install all dependencies (including dev dependencies)
 RUN npm install
 
-# Copy all files
+# Copy source files
 COPY . .
 
-# Build app
+# Build the application
 RUN npm run build
+
+# Stage 3: Runner (final, slim image)
+FROM node:18-alpine AS runner
+WORKDIR /app
+
+# Set to production environment
+ENV NODE_ENV=production
+
+# Copy necessary files from previous stages
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/next.config.js ./next.config.js
+
+# Don't run as root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
 # Expose port
 EXPOSE 3000

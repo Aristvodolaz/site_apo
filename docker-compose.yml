@@ -2,7 +2,11 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: arctic-olympiad:latest
+    container_name: arctic-olympiad
     ports:
       - "8080:3000"
     environment:
@@ -21,3 +25,12 @@ services:
       retries: 3
     env_file:
       - .env
+    # Настраиваем ограничения ресурсов
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
