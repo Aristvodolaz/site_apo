@@ -122,10 +122,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Statistics Section */}
-      <section className="py-5 bg-light">
+      {/* About Section */}
+      <section className="py-5">
         <div className="container">
-          <div className="row g-4">
+          <div className="row mb-5">
+            <div className="col-12 text-center">
+              <h2 className="section-heading underlined-heading mb-0">О нашей олимпиаде</h2>
+            </div>
+          </div>
+          
+          {/* Statistics Section - Moved here */}
+          <div className="row g-4 mb-5">
             {statistics.map((stat, index) => (
               <div key={index} className="col-md-6 col-lg-3">
                 <div className="stat-card h-100">
@@ -138,15 +145,9 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* About Section */}
-      <section className="py-5">
-        <div className="container">
+          
           <div className="row">
-            <div className="col-lg-8 mx-auto text-center mb-5">
-              <h2 className="display-5 mb-4">О нашей олимпиаде</h2>
+            <div className="col-lg-8 mx-auto text-center">
               <p className="lead">
                 Арктическая олимпиада «Полярный круг» проводится с 2020 года. 
                 За это время из небольшой региональной олимпиады по математике она выросла во всероссийское соревнование 
@@ -163,11 +164,15 @@ export default function Home() {
           </div>
         </div>
       </section>
-
+      
       {/* Subjects Section */}
-      <section className="py-5 bg-light">
+      <section className="py-5">
         <div className="container">
-          <h2 className="display-5 text-center mb-5">Профили олимпиады</h2>
+          <div className="row mb-5">
+            <div className="col-12">
+              <h2 className="section-heading side-bordered-header mb-0">Профили олимпиады</h2>
+            </div>
+          </div>
           <div className="row g-4">
             {subjectsData.map((subject) => (
               <div key={subject.id} className="col-md-6 col-lg-3">
@@ -193,7 +198,7 @@ export default function Home() {
                 <div className="card-body p-5">
                   <div className="row align-items-center">
                     <div className="col-lg-8 mb-4 mb-lg-0">
-                      <h3 className="mb-3">Регистрация участников открыта!</h3>
+                      <h2 className="section-heading mb-3">Регистрация участников открыта!</h2>
                       <p className="mb-0">
                         Приглашаем школьников 4-11 классов принять участие в Арктической олимпиаде «Полярный круг» 2025. 
                         Отборочный этап пройдет с 1 по 15 ноября 2024 года.
@@ -215,11 +220,15 @@ export default function Home() {
       {/* News Section */}
       <section className="py-5 bg-light">
         <div className="container">
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <h2 className="h2 mb-0">Новости олимпиады</h2>
-            <Link href="/news" legacyBehavior>
-              <a className="btn btn-outline-primary">Все новости</a>
-            </Link>
+          <div className="row mb-5">
+            <div className="col-12">
+              <div className="d-flex justify-content-between align-items-center">
+                <h2 className="section-heading side-bordered-header mb-0">Новости олимпиады</h2>
+                <Link href="/news" legacyBehavior>
+                  <a className="btn btn-outline-primary">Все новости</a>
+                </Link>
+              </div>
+            </div>
           </div>
           
           {loading ? (
@@ -250,30 +259,36 @@ export default function Home() {
       </section>
 
       {/* Partners Section */}
-      <section className="py-5">
-        <div className="container">
-          <h2 className="h2 text-center mb-5">Организаторы и партнеры</h2>
-          <div className="row justify-content-center g-4">
-            <div className="col-md-4 text-center">
-              <div className="mb-3">
-                <i className="bi bi-building fs-1 text-primary"></i>
+      <section className="py-5 bg-light partners-section">
+        <div className="container py-4">
+          <h2 className="section-heading side-bordered-header mb-5 text-center">Организаторы и партнеры</h2>
+          <div className="row justify-content-center g-5">
+            <div className="col-md-4">
+              <div className="partner-card h-100 text-center fade-in" style={{animationDelay: "0.1s"}}>
+                <div className="partner-icon-container">
+                  <i className="bi bi-building"></i>
+                </div>
+                <h4 className="mb-3 mt-4">Департамент образования ЯНАО</h4>
+                <p className="text-muted">Главный организатор Арктической олимпиады</p>
               </div>
-              <h4 className="mb-3">Департамент образования ЯНАО</h4>
-              <p className="text-muted">Главный организатор Арктической олимпиады</p>
             </div>
-            <div className="col-md-4 text-center">
-              <div className="mb-3">
-                <i className="bi bi-award fs-1 text-primary"></i>
+            <div className="col-md-4">
+              <div className="partner-card h-100 text-center fade-in" style={{animationDelay: "0.2s"}}>
+                <div className="partner-icon-container">
+                  <i className="bi bi-award"></i>
+                </div>
+                <h4 className="mb-3 mt-4">Ассоциация победителей олимпиад</h4>
+                <p className="text-muted">Научно-методическое сопровождение олимпиады</p>
               </div>
-              <h4 className="mb-3">Ассоциация победителей олимпиад</h4>
-              <p className="text-muted">Научно-методическое сопровождение олимпиады</p>
             </div>
-            <div className="col-md-4 text-center">
-              <div className="mb-3">
-                <i className="bi bi-mortarboard fs-1 text-primary"></i>
+            <div className="col-md-4">
+              <div className="partner-card h-100 text-center fade-in" style={{animationDelay: "0.3s"}}>
+                <div className="partner-icon-container">
+                  <i className="bi bi-mortarboard"></i>
+                </div>
+                <h4 className="mb-3 mt-4">Центр педагогического мастерства</h4>
+                <p className="text-muted">Подготовка заданий и проверка работ</p>
               </div>
-              <h4 className="mb-3">Центр педагогического мастерства</h4>
-              <p className="text-muted">Подготовка заданий и проверка работ</p>
             </div>
           </div>
         </div>
