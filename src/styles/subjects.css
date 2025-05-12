@@ -1,0 +1,54 @@
+/* Chemistry Icons Group */
+.chemistry-icons-group {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chemistry-icons-group .subject-icon-large {
+  font-size: 4rem;
+  color: #ffc107;
+  z-index: 2;
+}
+
+.chemistry-icons-group .subject-icon-small {
+  position: absolute;
+  font-size: 1.5rem;
+  color: #ffdb4d;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.chemistry-icons-group .top-right {
+  top: 0;
+  right: 0;
+  transform: translate(25%, -25%);
+}
+
+.chemistry-icons-group .bottom-left {
+  bottom: 0;
+  left: 0;
+  transform: translate(-25%, 25%);
+}
+
+.chemistry-icons-group .bottom-right {
+  bottom: 0;
+  right: 0;
+  transform: translate(25%, 25%);
+}
+
+.chemistry-icons-group:hover .subject-icon-small {
+  opacity: 1;
+  transform: scale(1.2) translate(25%, -25%);
+}
+
+.chemistry-icons-group:hover .bottom-left {
+  transform: scale(1.2) translate(-25%, 25%);
+}
+
+.chemistry-icons-group:hover .bottom-right {
+  transform: scale(1.2) translate(25%, 25%);
+} 
