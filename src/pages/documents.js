@@ -113,7 +113,7 @@ export default function Documents() {
       />
       
       <div className="doc-section-bg">
-        <div className="container pb-5 pt-4">
+        <div className="container py-4">
           <div className="row">
             <div className="col-lg-10 mx-auto">
               {/* Диагностика */}
@@ -131,9 +131,9 @@ export default function Documents() {
 
               {/* Поиск и мобильный фильтр */}
               <div className="search-filter-container mb-4 fade-in">
-                <div className="row g-3 align-items-center">
-                  <div className="col-md-7">
-                    <div className="search-container">
+                <div className="row align-items-center">
+                  <div className="col-md-7 mb-3 mb-md-0">
+                    <div className="search-container mb-3 mb-md-0">
                       <i className="bi bi-search search-icon"></i>
                       <input 
                         type="text" 
@@ -152,18 +152,20 @@ export default function Documents() {
                       )}
                     </div>
                   </div>
-                  <div className="col-md-5 d-flex justify-content-md-end">
-                    <button 
-                      className="btn btn-outline-primary d-md-none filter-toggle-btn"
-                      onClick={toggleMobileFilters}
-                    >
-                      <i className="bi bi-funnel me-1"></i>
-                      Фильтры
-                      <span className="badge bg-primary rounded-pill ms-2">{getFilteredDocs().length}</span>
-                    </button>
-                    <div className="document-count d-none d-md-flex align-items-center">
+                  <div className="col-md-5">
+                    <div className="d-md-none">
+                      <button 
+                        className="btn btn-outline-primary filter-toggle-btn"
+                        onClick={toggleMobileFilters}
+                      >
+                        <i className="bi bi-funnel me-1"></i>
+                        Фильтры
+                        <span className="badge bg-primary rounded-pill ms-2">{getFilteredDocs().length}</span>
+                      </button>
+                    </div>
+                    <div className="document-count d-none d-md-flex align-items-center justify-content-md-end">
                       <span className="text-muted me-2">Найдено:</span>
-                      <span className="fw-bold document-count-number">{getFilteredDocs().length}</span>
+                      <span className="document-count-number">{getFilteredDocs().length}</span>
                     </div>
                   </div>
                 </div>
@@ -172,8 +174,8 @@ export default function Documents() {
               <div className="row">
                 {/* Фильтры категорий - десктоп */}
                 <div className="col-md-3 mb-4 mb-md-0">
-                  <div className={`filters-sidebar fade-in d-none d-md-block`}>
-                    <h4 className="filters-title mb-4">Категории</h4>
+                  <div className="filters-sidebar fade-in d-none d-md-block">
+                    <h4 className="filters-title">Категории</h4>
                     <ul className="category-list">
                       {categories.map(category => (
                         <li 
@@ -252,8 +254,8 @@ export default function Documents() {
                           ))}
                         </div>
                       ) : (
-                        <div className="card shadow-custom border-0 rounded-4 p-4 text-center">
-                          <div className="card-body p-5">
+                        <div className="card shadow-sm border-0 rounded-4 p-4 text-center">
+                          <div className="card-body p-4">
                             <div className="empty-state-icon">
                               <i className="bi bi-file-earmark-text"></i>
                             </div>
@@ -287,9 +289,9 @@ export default function Documents() {
                   
                   {/* Информация о документах */}
                   {!loading && getFilteredDocs().length > 0 && (
-                    <div className="alert alert-info mt-5 mb-0 border-0 shadow-sm rounded-4 fade-in" style={{animationDelay: "0.4s"}}>
+                    <div className="alert alert-info mt-4 mb-0 border-0 shadow-sm rounded-4 fade-in">
                       <div className="d-flex py-2">
-                        <div className="me-4">
+                        <div className="me-3">
                           <i className="bi bi-info-circle-fill fs-3"></i>
                         </div>
                         <div>

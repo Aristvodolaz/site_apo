@@ -20,10 +20,11 @@ export default function DocumentCard({ title, description, url, category }) {
   const { icon, color } = getCategoryDetails(category);
   
   // Проверяем, является ли URL внешней ссылкой
-  const isExternalLink = url.startsWith('http');
+  const isExternalLink = url && url.startsWith('http');
   
   // Определяем тип документа по расширению
   const getDocumentType = (url) => {
+    if (!url) return 'Документ';
     if (url.endsWith('.pdf')) return 'PDF';
     if (url.endsWith('.doc') || url.endsWith('.docx')) return 'DOC';
     if (url.endsWith('.xls') || url.endsWith('.xlsx')) return 'XLS';
@@ -34,25 +35,25 @@ export default function DocumentCard({ title, description, url, category }) {
   const docType = getDocumentType(url);
 
   return (
-    <div className="document-card">
+    <div className="document-card" style={{ borderLeftColor: color }}>
       <div className="document-card-content">
         <div className="document-icon-container" style={{ backgroundColor: `${color}15` }}>
           <i className={`bi bi-${icon}`} style={{ color: color }}></i>
         </div>
-        <div className="document-type-badge" style={{ backgroundColor: color }}>
-          {docType}
-        </div>
+        
         <h3 className="document-title">{title}</h3>
         {description && <p className="document-description">{description}</p>}
+        
         <div className="document-actions">
           <a 
-            href={url} 
+            href={url || '#'} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="document-link"
+            style={{ color: color }}
           >
             <span>{isExternalLink ? 'Открыть документ' : 'Скачать документ'}</span>
-            <i className={`bi ${isExternalLink ? 'bi-box-arrow-up-right' : 'bi-download'} ms-2`}></i>
+            <i className={`bi ${isExternalLink ? 'bi-box-arrow-up-right' : 'bi-download'}`}></i>
           </a>
         </div>
       </div>
