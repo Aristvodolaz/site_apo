@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/contacts.css';
 import { useEffect } from 'react';
 
 function MyApp({ Component, pageProps }) {

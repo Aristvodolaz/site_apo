@@ -166,7 +166,7 @@ a:hover {
 
 .hero-snowflake-icon {
   position: relative;
-  font-size: 10rem;
+  font-size: 15rem;
   color: white;
   text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
   animation: pulse 4s ease-in-out infinite;

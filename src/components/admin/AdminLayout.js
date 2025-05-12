@@ -75,6 +75,11 @@ export default function AdminLayout({ children }) {
                   Содержимое страниц
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link href="/admin/migrate" className={`nav-link ${router.pathname === '/admin/migrate' ? 'active' : ''}`}>
+                  Миграция данных
+                </Link>
+              </li>
             </ul>
 
             <hr />

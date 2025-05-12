@@ -1,70 +1,18 @@
 import { verify } from 'jsonwebtoken';
 import cookie from 'cookie';
-import fs from 'fs';
-import path from 'path';
+import { contentService } from '../../../../lib/firebaseService';
 
 // Секретный ключ (должен совпадать с ключом в API аутентификации)
 const JWT_SECRET = 'your-secret-key';
 
-// Карта файлов данных
-const contentFiles = {
-  contacts: {
-    path: path.join(process.cwd(), 'src/data/contactsData.js'),
-    exportName: 'contactsData'
-  },
-  history: {
-    path: path.join(process.cwd(), 'src/data/historyData.js'),
-    exportName: 'historyData'
-  },
-  documents: {
-    path: path.join(process.cwd(), 'src/data/documentsData.js'),
-    exportName: 'documentsData'
-  },
-  subjects: {
-    path: path.join(process.cwd(), 'src/data/subjectsData.js'),
-    exportName: 'subjectsData'
-  },
-  regions: {
-    path: path.join(process.cwd(), 'src/data/regionsData.js'),
-    exportName: 'regionsData'
-  }
-};
-
-// Функция для чтения данных из файла
-const readContentData = (contentId) => {
-  const fileInfo = contentFiles[contentId];
-  
-  if (!fileInfo) {
-    throw new Error(`Контент с ID ${contentId} не найден`);
-  }
-  
-  const fileContent = fs.readFileSync(fileInfo.path, 'utf8');
-  const match = fileContent.match(new RegExp(`export const ${fileInfo.exportName} = (.*?);(?:\\s|$)`, 's'));
-  
-  if (match && match[1]) {
-    try {
-      // Преобразуем строку в объект JavaScript
-      return eval(`(${match[1]})`);
-    } catch (error) {
-      console.error(`Ошибка при парсинге данных ${contentId}:`, error);
-      throw new Error(`Ошибка формата данных в файле ${fileInfo.path}`);
-    }
-  }
-  
-  throw new Error(`Не удалось извлечь данные из файла ${fileInfo.path}`);
-};
-
-// Функция для записи данных в файл
-const writeContentData = (contentId, data) => {
-  const fileInfo = contentFiles[contentId];
-  
-  if (!fileInfo) {
-    throw new Error(`Контент с ID ${contentId} не найден`);
-  }
-  
-  const content = `export const ${fileInfo.exportName} = ${JSON.stringify(data, null, 2)};\n`;
-  fs.writeFileSync(fileInfo.path, content, 'utf8');
-};
+// Карта ID контента
+const contentIds = [
+  'contacts',
+  'history',
+  'documents',
+  'subjects',
+  'regions'
+];
 
 // Проверка аутентификации
 const isAuthenticated = (req) => {
@@ -79,7 +27,7 @@ const isAuthenticated = (req) => {
   }
 };
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   // Проверяем аутентификацию
   if (!isAuthenticated(req)) {
     return res.status(401).json({ message: 'Неавторизованный доступ' });
@@ -87,7 +35,7 @@ export default function handler(req, res) {
 
   const { id } = req.query;
   
-  if (!contentFiles[id]) {
+  if (!contentIds.includes(id)) {
     return res.status(404).json({ message: `Контент с ID ${id} не найден` });
   }
 
@@ -95,10 +43,16 @@ export default function handler(req, res) {
     case 'GET':
       // Получение данных контента
       try {
-        const data = readContentData(id);
+        const data = await contentService.getContent(id);
         return res.status(200).json(data);
       } catch (error) {
         console.error(`Ошибка при получении данных ${id}:`, error);
+        
+        // Если контент не найден, возвращаем пустой объект (для новых коллекций)
+        if (error.message && error.message.includes('не найден')) {
+          return res.status(200).json({});
+        }
+        
         return res.status(500).json({ message: error.message || 'Ошибка сервера при получении данных' });
       }
 
@@ -112,11 +66,12 @@ export default function handler(req, res) {
           return res.status(400).json({ message: 'Неверный формат данных' });
         }
         
-        writeContentData(id, newData);
+        const updatedData = await contentService.updateContent(id, newData);
         
         return res.status(200).json({ 
           success: true,
-          message: 'Данные успешно обновлены'
+          message: 'Данные успешно обновлены',
+          data: updatedData
         });
       } catch (error) {
         console.error(`Ошибка при обновлении данных ${id}:`, error);

@@ -9,6 +9,7 @@ export default function AdminDashboard() {
     totalNews: 0,
     recentNews: []
   });
+  const [useFirebase, setUseFirebase] = useState(false);
 
   useEffect(() => {
     // В реальном приложении здесь будет запрос к API
@@ -24,6 +25,17 @@ export default function AdminDashboard() {
       totalNews: news.length,
       recentNews: sortedNews.slice(0, 3) // Последние 3 новости
     });
+
+    // Проверяем наличие конфигурации Firebase
+    fetch('/api/admin/checkFirebase')
+      .then(response => response.json())
+      .then(data => {
+        setUseFirebase(data.configured);
+      })
+      .catch(error => {
+        console.error('Ошибка проверки Firebase:', error);
+        setUseFirebase(false);
+      });
   }, []);
 
   return (
@@ -37,6 +49,18 @@ export default function AdminDashboard() {
         <p className="text-muted">Добро пожаловать в административную панель сайта Арктической олимпиады "Полярный круг"</p>
       </div>
 
+      {!useFirebase && (
+        <div className="alert alert-warning mb-4">
+          <h5>Firebase не настроен</h5>
+          <p className="mb-2">
+            Для полноценной работы с данными рекомендуется настроить Firebase и выполнить миграцию данных.
+          </p>
+          <Link href="/admin/migrate" className="btn btn-sm btn-primary">
+            Настроить Firebase
+          </Link>
+        </div>
+      )}
+
       <div className="row">
         <div className="col-md-6 col-lg-4 mb-4">
           <div className="card h-100">
@@ -46,6 +70,11 @@ export default function AdminDashboard() {
                 <div className="text-primary fw-bold h4 mb-0">{stats.totalNews}</div>
                 <div className="text-muted">Всего новостей</div>
               </div>
+              {useFirebase && (
+                <div className="mt-3">
+                  <span className="badge bg-success">Firebase активен</span>
+                </div>
+              )}
             </div>
             <div className="card-footer bg-transparent">
               <Link href="/admin/news" className="text-decoration-none">
@@ -100,7 +129,10 @@ export default function AdminDashboard() {
                 <Link href="/admin/content" className="btn btn-outline-secondary">
                   Редактирование страниц
                 </Link>
-                <Link href="/" target="_blank" className="btn btn-outline-info">
+                <Link href="/admin/migrate" className="btn btn-outline-info">
+                  Миграция данных
+                </Link>
+                <Link href="/" target="_blank" className="btn btn-outline-dark">
                   Просмотр сайта
                 </Link>
               </div>

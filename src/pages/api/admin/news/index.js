@@ -1,36 +1,9 @@
 import { verify } from 'jsonwebtoken';
 import cookie from 'cookie';
-import fs from 'fs';
-import path from 'path';
+import { newsService } from '../../../../lib/firebaseService';
 
 // Секретный ключ (должен совпадать с ключом в API аутентификации)
 const JWT_SECRET = 'your-secret-key';
-
-// Путь к файлу с данными новостей
-const NEWS_DATA_PATH = path.join(process.cwd(), 'src/data/newsData.js');
-
-// Функция для чтения данных новостей
-const readNewsData = () => {
-  const fileContent = fs.readFileSync(NEWS_DATA_PATH, 'utf8');
-  // Извлекаем массив данных из экспорта
-  const match = fileContent.match(/export const newsData = (\[[\s\S]*\]);/);
-  if (match && match[1]) {
-    try {
-      // Преобразуем строку в объект JavaScript
-      return eval(match[1]);
-    } catch (error) {
-      console.error('Ошибка при парсинге данных новостей:', error);
-      return [];
-    }
-  }
-  return [];
-};
-
-// Функция для записи данных новостей
-const writeNewsData = (data) => {
-  const content = `export const newsData = ${JSON.stringify(data, null, 2)};\n`;
-  fs.writeFileSync(NEWS_DATA_PATH, content, 'utf8');
-};
 
 // Проверка аутентификации
 const isAuthenticated = (req) => {
@@ -45,7 +18,7 @@ const isAuthenticated = (req) => {
   }
 };
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
   // Проверяем аутентификацию
   if (!isAuthenticated(req)) {
     return res.status(401).json({ message: 'Неавторизованный доступ' });
@@ -55,7 +28,7 @@ export default function handler(req, res) {
     case 'GET':
       // Получение списка новостей
       try {
-        const news = readNewsData();
+        const news = await newsService.getAllNews();
         return res.status(200).json(news);
       } catch (error) {
         console.error('Ошибка при получении новостей:', error);
@@ -65,15 +38,7 @@ export default function handler(req, res) {
     case 'POST':
       // Создание новой новости
       try {
-        const news = readNewsData();
-        const newNews = {
-          ...req.body,
-          id: news.length > 0 ? Math.max(...news.map(item => item.id)) + 1 : 1
-        };
-        
-        news.push(newNews);
-        writeNewsData(news);
-        
+        const newNews = await newsService.createNews(req.body);
         return res.status(201).json(newNews);
       } catch (error) {
         console.error('Ошибка при создании новости:', error);
