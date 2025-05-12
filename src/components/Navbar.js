@@ -152,7 +152,6 @@ export default function Navbar() {
               <Link href="/register" legacyBehavior>
                 <a className="btn btn-register">
                   <span>Регистрация</span>
-                  <i className="bi bi-arrow-right-circle ms-2"></i>
                 </a>
               </Link>
             </li>
