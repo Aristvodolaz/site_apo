@@ -1,0 +1,2 @@
+# Ежедневное резервное копирование в 2:00 ночи
+0 2 * * * /var/www/site_apo/backup.sh >> /var/log/arctic-backup.log 2>&1 
