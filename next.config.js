@@ -4,10 +4,6 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['arcticum.yanao.ru'],
-  },
-  // Explicitly set to use Pages Router
-  experimental: {
-    appDir: false
   }
 }
 
