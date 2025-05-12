@@ -43,24 +43,67 @@ arctic-olympiad/
 npm install
 ```
 
-2. Запустите сервер разработки:
+2. Создайте файл `.env.local` в корне проекта со следующими переменными:
+
+```
+# Конфигурация Firebase
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+
+# Секретный ключ для JWT
+JWT_SECRET=your-secret-key
+```
+
+3. Запустите проект в режиме разработки:
 
 ```bash
 npm run dev
 ```
 
-3. Откройте [http://localhost:3000](http://localhost:3000) в браузере.
+4. Откройте [http://localhost:3000](http://localhost:3000) в браузере.
 
-## Сборка для производства
+## Сборка для продакшена
 
 ```bash
 npm run build
+npm run start
 ```
 
-## Запуск на сервере
+## Использование Firebase
+
+Проект поддерживает использование Firebase для хранения данных. Для настройки Firebase:
+
+1. Создайте проект в [Firebase Console](https://console.firebase.google.com/)
+2. Создайте веб-приложение в проекте
+3. Скопируйте данные конфигурации в файл `.env.local`
+4. Зайдите в административную панель по адресу `/admin/login` (логин: admin, пароль: arctic2025olympiad)
+5. Перейдите в раздел "Миграция данных" и запустите процесс миграции
+
+## Административная панель
+
+Для доступа к административной панели перейдите по адресу `/admin/login`:
+- Логин: `admin`
+- Пароль: `arctic2025olympiad`
+
+В административной панели доступны:
+- Управление новостями
+- Редактирование содержимого страниц
+- Миграция данных в Firebase
+
+## Docker
+
+Проект включает в себя Docker-конфигурацию для запуска в контейнере:
 
 ```bash
-npm run start
+# Для Windows
+./docker-deploy.ps1
+
+# Для Linux/Mac
+./docker-deploy.sh
 ```
 
 ## Страницы сайта

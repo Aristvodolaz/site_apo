@@ -1,0 +1,280 @@
+/* Стили для страницы контактов */
+
+/* Волновой эффект */
+.contact-wave-container {
+  position: relative;
+  overflow: hidden;
+  height: 100px;
+  margin-top: -50px;
+  margin-bottom: 30px;
+}
+
+.contact-wave {
+  position: absolute;
+  width: 100%;
+  height: 100px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-size: cover;
+  bottom: 0;
+}
+
+/* Карточки с тенями и анимацией */
+.card {
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border-radius: 16px !important;
+  border-left: 4px solid var(--bs-primary);
+  overflow: hidden;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+.rounded-4 {
+  border-radius: 16px !important;
+}
+
+/* Иконки и их контейнеры */
+.text-primary i {
+  transition: transform 0.3s ease;
+}
+
+.card:hover .text-primary i {
+  transform: scale(1.2);
+}
+
+.contact-item {
+  transition: transform 0.3s ease;
+  margin-bottom: 1.25rem;
+}
+
+.contact-item:last-child {
+  margin-bottom: 0;
+}
+
+.contact-item:hover {
+  transform: translateX(5px);
+}
+
+.contact-link {
+  font-weight: 500;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  color: var(--bs-primary) !important;
+  text-decoration: underline !important;
+}
+
+/* Заголовки секций */
+h2 {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 1.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.02em;
+}
+
+h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 4px;
+  background-color: var(--bs-primary);
+  border-radius: 4px;
+}
+
+/* Анимация появления секций */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стиль для иконки главного организатора */
+.organizer-icon-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  background-color: rgba(var(--bs-primary-rgb), 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s ease, background-color 0.3s ease;
+  border-left: 3px solid var(--bs-primary);
+}
+
+.organizer-icon-container i {
+  font-size: 3.5rem;
+  transition: transform 0.5s ease, color 0.3s ease;
+}
+
+.card:hover .organizer-icon-container {
+  transform: rotate(10deg) scale(1.1);
+  background-color: rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.card:hover .organizer-icon-container i {
+  color: var(--bs-primary);
+}
+
+/* Стили для сетки координаторов */
+.coordinators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.coordinator-card {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid var(--bs-primary);
+}
+
+.coordinator-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.subject-badge {
+  background-color: var(--bs-primary);
+  color: white;
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  position: relative;
+  letter-spacing: 0.02em;
+}
+
+.coordinator-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  position: relative;
+  padding-right: 10px;
+  letter-spacing: -0.01em;
+}
+
+.coordinator-email {
+  color: var(--bs-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease, text-decoration 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.coordinator-email:hover {
+  text-decoration: underline;
+}
+
+/* Анимация для иконок в карточках контактов */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.text-primary i.pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Стиль для "Остались вопросы?" блока */
+.alert-info {
+  border-left: 5px solid var(--bs-primary) !important;
+  border-top: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  background-color: rgba(var(--bs-primary-rgb), 0.07);
+  padding: 1.5rem;
+}
+
+.alert-info .alert-heading {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.alert-info .alert-link {
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.alert-info i {
+  color: var(--bs-primary);
+}
+
+/* Медиа-запросы для лучшей адаптивности */
+@media (max-width: 768px) {
+  h2::before {
+    width: 4px;
+  }
+  
+  .coordinators-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .organizer-icon-container {
+    width: 90px;
+    height: 90px;
+    margin: 0 auto;
+    border-radius: 16px;
+  }
+  
+  .organizer-icon-container i {
+    font-size: 2.5rem;
+  }
+  
+  .coordinator-card {
+    padding: 22px;
+  }
+  
+  .alert-info {
+    padding: 1.25rem;
+  }
+  
+  h2 {
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* Дополнительные улучшения для таблет и больших устройств */
+@media (min-width: 992px) {
+  .coordinators-grid {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 30px;
+  }
+  
+  .alert-info {
+    padding: 1.75rem;
+  }
+}

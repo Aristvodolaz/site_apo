@@ -34,11 +34,9 @@ export default function NewsCard({ title, date, summary, link }) {
               </div>
               {link && (
                 <div className="news-card-link-container">
-                  <Link href={link} legacyBehavior>
-                    <a className="news-card-link">
+                  <Link href={link} className="news-card-link">
                       Читать далее
                       <i className="bi bi-arrow-right ms-2"></i>
-                    </a>
                   </Link>
                 </div>
               )}
