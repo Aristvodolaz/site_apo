@@ -127,7 +127,7 @@ export default function Home() {
         <div className="container">
           <div className="row mb-5">
             <div className="col-12 text-center">
-              <h2 className="section-heading underlined-heading mb-0">О нашей олимпиаде</h2>
+              <h2 className="section-heading mb-0">О нашей олимпиаде</h2>
             </div>
           </div>
           
