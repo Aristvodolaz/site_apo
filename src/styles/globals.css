@@ -87,38 +87,39 @@ a:hover {
 
 .hero-btn-primary, 
 .hero-btn-secondary {
-  padding: 0.8rem 1.8rem;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
+  padding: 0.8rem 1.8rem !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .hero-btn-primary {
-  background: white;
-  color: var(--primary-color);
-  border: none;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  background: white !important;
+  color: var(--primary-color) !important;
+  border: none !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
 .hero-btn-primary:hover {
-  background: white;
-  color: var(--primary-color);
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  background: white !important;
+  color: var(--primary-color) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15) !important;
 }
 
 .hero-btn-secondary {
-  background: transparent;
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.7);
+  background: transparent !important;
+  color: white !important;
+  border: 2px solid rgba(255, 255, 255, 0.7) !important;
 }
 
 .hero-btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: white;
-  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: white !important;
+  transform: translateY(-3px) !important;
+  color: white !important;
 }
 
 .hero-btn-primary i,
