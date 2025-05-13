@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { subjectsData } from '../data/subjectsData';
 import { useEffect, useState } from 'react';
 import { getNews } from '../lib/dataService';
+import OrganizersAndPartners from '../components/OrganizersAndPartners';
 
 export default function Home() {
   // Statistics data
@@ -258,41 +259,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Partners Section */}
-      <section className="py-5 bg-light partners-section">
-        <div className="container py-4">
-          <h2 className="section-heading side-bordered-header mb-5 text-center">Организаторы и партнеры</h2>
-          <div className="row justify-content-center g-5">
-            <div className="col-md-4">
-              <div className="partner-card h-100 text-center fade-in" style={{animationDelay: "0.1s"}}>
-                <div className="partner-icon-container">
-                  <i className="bi bi-building"></i>
-                </div>
-                <h4 className="mb-3 mt-4">Департамент образования ЯНАО</h4>
-                <p className="text-muted">Главный организатор Арктической олимпиады</p>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="partner-card h-100 text-center fade-in" style={{animationDelay: "0.2s"}}>
-                <div className="partner-icon-container">
-                  <i className="bi bi-award"></i>
-                </div>
-                <h4 className="mb-3 mt-4">Ассоциация победителей олимпиад</h4>
-                <p className="text-muted">Научно-методическое сопровождение олимпиады</p>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="partner-card h-100 text-center fade-in" style={{animationDelay: "0.3s"}}>
-                <div className="partner-icon-container">
-                  <i className="bi bi-mortarboard"></i>
-                </div>
-                <h4 className="mb-3 mt-4">Центр педагогического мастерства</h4>
-                <p className="text-muted">Подготовка заданий и проверка работ</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Организаторы и партнеры */}
+      <OrganizersAndPartners />
     </Layout>
   );
 } 
