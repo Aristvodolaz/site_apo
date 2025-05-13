@@ -4214,3 +4214,137 @@ footer {
   margin-bottom: 1.5rem;
   color: var(--text-dark);
 }
+
+/* Контейнер для карточек */
+.subjects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 1.5rem;
+}
+
+/* Стили карточек предметов олимпиады */
+.subject-profile-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  border-radius: 16px;
+  background: transparent;
+}
+
+.subject-profile-card:hover {
+  transform: translateY(-5px);
+}
+
+.subject-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+/* Цвета для разных предметов */
+.subject-icon-wrapper.math {
+  color: #007AFF;
+}
+
+.subject-icon-wrapper.biology {
+  color: #34C759;
+}
+
+.subject-icon-wrapper.physics {
+  color: #FF3B30;
+}
+
+.subject-icon-wrapper.chemistry {
+  color: #FFB300;
+}
+
+.subject-icon-wrapper i {
+  font-size: 1.75rem;
+  transition: transform 0.3s ease;
+}
+
+.subject-profile-card:hover .subject-icon-wrapper i {
+  transform: scale(1.2);
+}
+
+.subject-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1C1C1E;
+  margin-bottom: 0.75rem;
+}
+
+.subject-description {
+  color: #6C6C70;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.subject-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--primary-color);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-top: auto;
+}
+
+.subject-link:hover {
+  transform: translateX(8px);
+  text-decoration: none;
+}
+
+.subject-link i {
+  transition: transform 0.3s ease;
+}
+
+.subject-profile-card:hover .subject-link i {
+  transform: translateX(5px);
+}
+
+@media (max-width: 768px) {
+  .subjects-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1rem;
+  }
+
+  .subject-title {
+    font-size: 1.25rem;
+  }
+
+  .subject-description {
+    font-size: 0.9rem;
+  }
+}
+
+/* Анимация появления */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.subject-profile-card {
+  animation: cardAppear 0.6s ease-out forwards;
+}
+
+.subject-profile-card:nth-child(1) { animation-delay: 0.1s; }
+.subject-profile-card:nth-child(2) { animation-delay: 0.2s; }
+.subject-profile-card:nth-child(3) { animation-delay: 0.3s; }
+.subject-profile-card:nth-child(4) { animation-delay: 0.4s; }

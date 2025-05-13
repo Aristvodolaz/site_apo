@@ -248,7 +248,7 @@ export default function PhysicsSubject() {
           </div>
           
           <div className="col-lg-4">
-            <div className="subject-sidebar sticky-top" style={{ top: '2rem' }}>
+            <div className="subject-sidebar" style={{ top: '2rem' }}>
               <div className="subject-sidebar-card">
                 <h3 className="sidebar-card-title">
                   <i className="bi bi-calendar-check me-2" style={{color: '#dc3545'}}></i>
