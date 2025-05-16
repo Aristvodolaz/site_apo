@@ -7,7 +7,7 @@ export default function Register() {
     <Layout title="Регистрация">
       <PageHeader 
         title="Регистрация на олимпиаду" 
-        subtitle="Заполните форму для участия в Арктической олимпиаде «Полярный круг» 2025"
+        subtitle="Заполните форму для участия в Арктической олимпиаде «Полярный круг»"
       />
       
       <div className="container py-5">

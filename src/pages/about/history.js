@@ -1,19 +1,61 @@
 import Layout from '../../components/Layout';
 import PageHeader from '../../components/PageHeader';
 import { historyData } from '../../data/historyData';
+import { useEffect, useState } from 'react';
 
 export default function History() {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Эффект для анимации загрузки страницы
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
+
+  // Эффект для анимации при скролле
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    });
+    
+    const elements = document.querySelectorAll('.animate-on-scroll');
+    elements.forEach(el => observer.observe(el));
+    
+    return () => {
+      elements.forEach(el => observer.unobserve(el));
+    };
+  }, []);
+
   return (
     <Layout title="История олимпиады">
-      <PageHeader 
-        title="История олимпиады" 
-        subtitle="Развитие Арктической олимпиады «Полярный круг» с момента ее создания"
-      />
+      <section className="history-hero">
+        <div className="history-hero-bg"></div>
+        <div className="container py-5 position-relative z-index-1">
+          <div className="row justify-content-center text-center">
+            <div className="col-lg-8">
+              <h1 className={`history-title animate-on-scroll ${isLoaded ? 'visible' : ''}`}>История олимпиады</h1>
+              <p className={`history-subtitle animate-on-scroll ${isLoaded ? 'visible' : ''}`}>
+                Развитие Арктической олимпиады «Полярный круг» с момента ее создания
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="history-wave-container">
+          <div className="history-wave"></div>
+        </div>
+      </section>
       
       <div className="container py-5">
         <div className="row">
-          <div className="col-lg-8 mx-auto">
-            <div className="mb-5">
+          <div className="col-lg-10 mx-auto">
+            <div className={`glass-card mb-5 ${isLoaded ? 'visible' : ''}`}>
               <p className="lead">
                 Арктическая олимпиада «Полярный круг» прошла долгий путь развития 
                 от небольшой региональной олимпиады по математике до всероссийского 
@@ -25,8 +67,8 @@ export default function History() {
               {historyData.map((item, index) => (
                 <div className="timeline-item" key={index}>
                   <div className="card mb-4">
-                    <div className="card-header bg-primary bg-opacity-10">
-                      <h3 className="h5 mb-0">{item.year}: {item.title}</h3>
+                    <div className="card-header">
+                      <h3>{item.year}: {item.title}</h3>
                     </div>
                     <div className="card-body">
                       <p>{item.description}</p>

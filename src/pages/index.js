@@ -82,7 +82,7 @@ export default function Home() {
             <div className="col-lg-7">
               <div className="hero-content" style={{ transform: `translateY(${offsetY * -0.1}px)` }}>
                 <h1 className="display-4 fw-bold mb-4 hero-title">
-                  Арктическая олимпиада <span className="text-highlight">«Полярный круг»</span> 2025
+                  Арктическая олимпиада <span className="text-highlight">«Полярный круг»</span>
                 </h1>
                 <p className="lead mb-4 hero-subtitle">
                   Всероссийская олимпиада школьников по математике, биологии, физике и химии, 
@@ -201,7 +201,7 @@ export default function Home() {
                     <div className="col-lg-8 mb-4 mb-lg-0">
                       <h2 className="section-heading mb-3">Регистрация участников открыта!</h2>
                       <p className="mb-0">
-                        Приглашаем школьников 4-11 классов принять участие в Арктической олимпиаде «Полярный круг» 2025. 
+                        Приглашаем школьников 4-11 классов принять участие в Арктической олимпиаде «Полярный круг». 
                         Отборочный этап пройдет с 1 по 15 ноября 2024 года.
                       </p>
                     </div>

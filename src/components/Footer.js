@@ -49,7 +49,7 @@ export default function Footer() {
                   </div>
                   <div className="ms-3">
                     <h3 className="h4 mb-1">Арктическая олимпиада</h3>
-                    <span className="badge bg-light text-primary">2025</span>
+                    <span className="badge bg-light text-primary">Олимпиада</span>
                   </div>
                 </div>
               </div>
