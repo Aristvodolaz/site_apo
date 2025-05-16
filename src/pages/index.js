@@ -191,7 +191,7 @@ export default function Home() {
       </section>
 
       {/* Registration CTA */}
-      <section className="py-5">
+      {/* <section className="py-5">
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-10">
@@ -216,7 +216,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* News Section */}
       <section className="py-5 bg-light">
