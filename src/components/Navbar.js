@@ -33,7 +33,6 @@ export default function Navbar() {
             </div>
             <div>
               <span className="brand-text">Арктическая олимпиада</span>
-              <span className="ms-2 badge year-badge">2025</span>
             </div>
           </a>
         </Link>

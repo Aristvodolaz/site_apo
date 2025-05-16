@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { regionsData } from '../data/regionsData';
 import InputMask from 'react-input-mask';
+import { db } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState({
@@ -18,14 +20,43 @@ export default function RegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [emailError, setEmailError] = useState(null);
+  const [emailCheckTimeout, setEmailCheckTimeout] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === 'email') {
+      setEmailError(null);
+      // Отменяем предыдущий таймаут, если он существует
+      if (emailCheckTimeout) {
+        clearTimeout(emailCheckTimeout);
+      }
+      
+      // Устанавливаем новый таймаут для проверки email
+      if (value.trim() !== '') {
+        const newTimeout = setTimeout(async () => {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (emailRegex.test(value)) {
+            try {
+              const exists = await checkEmailExists(value);
+              if (exists) {
+                setEmailError('Этот email уже зарегистрирован');
+              }
+            } catch (error) {
+              console.error('Ошибка при проверке email:', error);
+            }
+          }
+        }, 500); // Проверяем через 500мс после последнего ввода
+        setEmailCheckTimeout(newTimeout);
+      }
+    }
+
     if (name === 'region') {
       setFormData({
         ...formData,
         [name]: value,
-        city: '' // Reset city when region changes
+        city: ''
       });
     } else {
       setFormData({
@@ -50,19 +81,72 @@ export default function RegistrationForm() {
     }
   };
 
+  const validateForm = () => {
+    // Проверка обязательных полей
+    if (!formData.firstName.trim()) return 'Введите имя';
+    if (!formData.lastName.trim()) return 'Введите фамилию';
+    if (!formData.email.trim()) return 'Введите email';
+    if (!formData.school.trim()) return 'Введите название учебного заведения';
+    if (!formData.region) return 'Выберите регион';
+    if (!formData.city) return 'Выберите город';
+    if (!formData.grade) return 'Выберите класс';
+    if (formData.subjects.length === 0) return 'Выберите хотя бы один предмет';
+
+    // Валидация email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) return 'Введите корректный email';
+
+    // Валидация телефона (если указан)
+    if (formData.phone) {
+      const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
+      if (!phoneRegex.test(formData.phone)) return 'Введите корректный номер телефона';
+    }
+
+    return null;
+  };
+
+  const checkEmailExists = async (email) => {
+    const registrationsRef = collection(db, 'registrations');
+    const q = query(registrationsRef, where('email', '==', email.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
-    
+
+    // Проверяем валидацию
+    const validationError = validateForm();
+    if (validationError) {
+      setSubmitError(validationError);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // This would be replaced with an actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Проверяем, существует ли уже регистрация с таким email
+      const emailExists = await checkEmailExists(formData.email);
+      if (emailExists) {
+        setSubmitError('Участник с таким email уже зарегистрирован');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Добавляем данные в коллекцию registrations
+      const registrationsRef = collection(db, 'registrations');
+      await addDoc(registrationsRef, {
+        ...formData,
+        email: formData.email.toLowerCase(), // Сохраняем email в нижнем регистре
+        createdAt: serverTimestamp(),
+        status: 'new',
+        year: new Date().getFullYear()
+      });
       
-      console.log('Form submitted:', formData);
       setSubmitSuccess(true);
       
-      // Reset form
+      // Сброс формы
       setFormData({
         firstName: '',
         lastName: '',
@@ -75,7 +159,7 @@ export default function RegistrationForm() {
         subjects: [],
       });
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error('Ошибка при сохранении данных:', error);
       setSubmitError('Произошла ошибка при отправке формы. Пожалуйста, попробуйте снова.');
     } finally {
       setIsSubmitting(false);
@@ -145,13 +229,18 @@ export default function RegistrationForm() {
                 <label htmlFor="email" className="form-label">Электронная почта *</label>
                 <input
                   type="email"
-                  className="form-control form-control-lg"
+                  className={`form-control form-control-lg ${emailError ? 'is-invalid' : ''}`}
                   id="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
                 />
+                {emailError && (
+                  <div className="invalid-feedback">
+                    {emailError}
+                  </div>
+                )}
                 <div className="form-text">
                   На этот адрес будут отправлены дальнейшие инструкции
                 </div>
