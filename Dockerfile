@@ -3,20 +3,18 @@ FROM node:18-alpine AS deps
 WORKDIR /app
 
 # Copy package files
-COPY package.json ./
+COPY package*.json ./
 
 # Install dependencies with only production dependencies
-RUN npm install --only=production
+RUN npm install --only=production --no-package-lock
 
 # Stage 2: Builder
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files
-COPY package.json ./
-
-# Install all dependencies (including dev dependencies)
-RUN npm install
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install --no-package-lock
 
 # Copy source files
 COPY . .
@@ -40,35 +38,30 @@ ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
 ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
 ENV NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
 
-# Build the application
-RUN npm run build
+# Build the application with cache cleaning
+RUN npm run build && npm cache clean --force
 
 # Stage 3: Runner (final, slim image)
 FROM node:18-alpine AS runner
 WORKDIR /app
 
 # Set to production environment
-ENV NODE_ENV=production
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1
 
-# Pass environment variables to runtime
-ENV NEXT_PUBLIC_FIREBASE_API_KEY=$NEXT_PUBLIC_FIREBASE_API_KEY
-ENV NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=$NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-ENV NEXT_PUBLIC_FIREBASE_PROJECT_ID=$NEXT_PUBLIC_FIREBASE_PROJECT_ID
-ENV NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=$NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-ENV NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs && \
+    chown -R nextjs:nodejs /app
 
-# Copy necessary files from previous stages
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.js ./next.config.js
+# Copy only necessary files from previous stages
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/next.config.js ./next.config.js
 
-# Don't run as root
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-RUN chown -R nextjs:nodejs /app
+# Switch to non-root user
 USER nextjs
 
 # Expose port
