@@ -49,7 +49,17 @@ export default function AdminLogin() {
       }
     };
     
+    // Проверяем, инициализирован ли дефолтный админ
+    const initializeAdmin = async () => {
+      try {
+        await fetch('/api/admin/initialize', { method: 'POST' });
+      } catch (error) {
+        console.error('Ошибка при инициализации админа:', error);
+      }
+    };
+    
     checkAuth();
+    initializeAdmin();
   }, []);
 
   const handleSubmit = async (e) => {

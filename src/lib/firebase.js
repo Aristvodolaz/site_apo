@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDGUHtsKlZv1-FMdHSJyHcjWBaUyAjIUHs",
@@ -14,7 +15,7 @@ const firebaseConfig = {
 };
 
 // Инициализация Firebase только если конфигурация предоставлена
-let app, db, auth;
+let app, db, auth, rtdb;
 
 try {
   // Проверяем, что необходимые параметры предоставлены
@@ -22,6 +23,7 @@ try {
     app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     auth = getAuth(app);
+    rtdb = getDatabase(app);
   } else {
     console.warn('Firebase не настроен. Укажите переменные окружения для Firebase.');
   }
@@ -29,4 +31,4 @@ try {
   console.error('Ошибка при инициализации Firebase:', error);
 }
 
-export { db, auth }; 
+export { db, auth, rtdb }; 

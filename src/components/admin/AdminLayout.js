@@ -63,34 +63,61 @@ export default function AdminLayout({ children }) {
             <ul className="nav flex-column">
               <li className="nav-item">
                 <Link href="/admin/dashboard" className={`nav-link ${router.pathname === '/admin/dashboard' ? 'active' : ''}`}>
+                  <i className="bi bi-speedometer2 me-2"></i>
                   Главная
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/admin/news" className={`nav-link ${router.pathname.startsWith('/admin/news') ? 'active' : ''}`}>
+                  <i className="bi bi-newspaper me-2"></i>
                   Управление новостями
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/admin/content" className={`nav-link ${router.pathname.startsWith('/admin/content') ? 'active' : ''}`}>
+                  <i className="bi bi-file-earmark-text me-2"></i>
                   Содержимое страниц
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/admin/migrate" className={`nav-link ${router.pathname === '/admin/migrate' ? 'active' : ''}`}>
+                  <i className="bi bi-arrow-left-right me-2"></i>
                   Миграция данных
                 </Link>
               </li>
+              
+              {/* Отображаем пункт управления администраторами только для суперадминов */}
+              {user && user.role === 'superadmin' && (
+                <li className="nav-item">
+                  <Link href="/admin/admins" className={`nav-link ${router.pathname === '/admin/admins' ? 'active' : ''}`}>
+                    <i className="bi bi-people-fill me-2"></i>
+                    Управление администраторами
+                  </Link>
+                </li>
+              )}
             </ul>
 
             <hr />
             
             <div className="px-3 mt-4">
-              {user && <p className="mb-1">Вы вошли как: <strong>{user.username}</strong></p>}
+              {user && (
+                <div className="mb-3">
+                  <p className="mb-1 d-flex align-items-center">
+                    <i className="bi bi-person-circle me-2"></i>
+                    <strong>{user.name || user.username}</strong>
+                  </p>
+                  <small className="d-block text-muted">
+                    {user.role === 'superadmin' && 'Суперадминистратор'}
+                    {user.role === 'admin' && 'Администратор'}
+                    {user.role === 'editor' && 'Редактор'}
+                  </small>
+                </div>
+              )}
               <button 
                 onClick={handleLogout} 
-                className="btn btn-outline-danger btn-sm mt-2"
+                className="btn btn-outline-danger btn-sm d-flex align-items-center"
               >
+                <i className="bi bi-box-arrow-right me-2"></i>
                 Выйти
               </button>
             </div>
