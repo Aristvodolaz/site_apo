@@ -12,6 +12,7 @@ let bootstrap;
 
 export default function NewsManagement() {
   const [news, setNews] = useState([]);
+  const [filteredNews, setFilteredNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingNews, setEditingNews] = useState(null);
   const [formData, setFormData] = useState({
@@ -21,6 +22,9 @@ export default function NewsManagement() {
     isPublished: true,
     isImportant: false
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Инициализация Bootstrap
   useEffect(() => {
@@ -60,6 +64,7 @@ export default function NewsManagement() {
       });
       
       setNews(newsData);
+      setFilteredNews(newsData);
     } catch (error) {
       console.error('Ошибка загрузки новостей:', error);
     } finally {
@@ -70,6 +75,40 @@ export default function NewsManagement() {
   useEffect(() => {
     loadNews();
   }, []);
+
+  // Фильтрация новостей при изменении поискового запроса
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredNews(news);
+    } else {
+      const filtered = news.filter(item => 
+        item.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredNews(filtered);
+    }
+    setCurrentPage(1); // Сбрасываем на первую страницу при поиске
+  }, [searchTerm, news]);
+
+  // Обработка изменения поискового запроса
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Получение текущей страницы новостей
+  const getCurrentPageItems = () => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return filteredNews.slice(indexOfFirstItem, indexOfLastItem);
+  };
+
+  // Изменение страницы
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Изменение количества элементов на странице
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Сбрасываем на первую страницу
+  };
 
   // Обработчики формы
   const handleInputChange = (e) => {
@@ -199,6 +238,69 @@ export default function NewsManagement() {
     }
   };
 
+  // Расчет индекса записи для отображения нумерации
+  const getItemIndex = (index) => {
+    return (currentPage - 1) * itemsPerPage + index + 1;
+  };
+
+  // Получение общего количества страниц
+  const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
+
+  // Генерация массива страниц для пагинации
+  const getPageNumbers = () => {
+    const maxPagesToShow = 5;
+    const pages = [];
+    
+    if (totalPages <= maxPagesToShow) {
+      // Если страниц меньше или равно maxPagesToShow, показываем все
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Сложная логика для больших списков страниц
+      let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
+      let endPage = startPage + maxPagesToShow - 1;
+      
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+      }
+      
+      // Добавляем первую страницу и многоточие
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) {
+          pages.push('...');
+        }
+      }
+      
+      // Добавляем основные страницы
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Добавляем многоточие и последнюю страницу
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pages.push('...');
+        }
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  // Вычисление диапазона отображаемых элементов
+  const getDisplayRange = () => {
+    if (filteredNews.length === 0) return '0-0 из 0';
+    
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, filteredNews.length);
+    
+    return `${start}-${end} из ${filteredNews.length}`;
+  };
+
   return (
     <AdminProtected>
       <Layout title="Управление новостями">
@@ -233,12 +335,67 @@ export default function NewsManagement() {
                   </button>
                 </div>
 
+                {/* Поиск и фильтры */}
+                <div className="row mb-4">
+                  <div className="col-md-6">
+                    <div className="input-group">
+                      <span className="input-group-text bg-light">
+                        <i className="bi bi-search text-muted"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Поиск по названию..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                      />
+                      {searchTerm && (
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          onClick={() => setSearchTerm('')}
+                          title="Очистить"
+                        >
+                          <i className="bi bi-x-lg"></i>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-md-3 ms-auto">
+                    <div className="d-flex align-items-center justify-content-end">
+                      <label htmlFor="itemsPerPage" className="form-label mb-0 me-2">
+                        Показывать по:
+                      </label>
+                      <select
+                        id="itemsPerPage"
+                        className="form-select form-select-sm"
+                        value={itemsPerPage}
+                        onChange={handleItemsPerPageChange}
+                        style={{ width: 'auto' }}
+                      >
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {searchTerm && (
+                  <div className="alert alert-info mb-4">
+                    <i className="bi bi-info-circle me-2"></i>
+                    По запросу <strong>"{searchTerm}"</strong> найдено: {filteredNews.length}
+                  </div>
+                )}
+
                 {/* Таблица новостей */}
                 <div className="table-responsive">
                   <table className="table table-striped table-hover align-middle">
                     <thead>
                       <tr>
-                        <th style={{ width: '40%' }}>Заголовок</th>
+                        <th style={{ width: '5%' }}>#</th>
+                        <th style={{ width: '35%' }}>Заголовок</th>
                         <th style={{ width: '15%' }}>Дата</th>
                         <th style={{ width: '15%' }}>Статус</th>
                         <th style={{ width: '15%' }}>Важность</th>
@@ -248,21 +405,22 @@ export default function NewsManagement() {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan="5" className="text-center py-4">
+                          <td colSpan="6" className="text-center py-4">
                             <div className="spinner-border text-primary" role="status">
                               <span className="visually-hidden">Загрузка...</span>
                             </div>
                           </td>
                         </tr>
-                      ) : news.length === 0 ? (
+                      ) : filteredNews.length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="text-center py-4">
-                            Новости не найдены
+                          <td colSpan="6" className="text-center py-4">
+                            {searchTerm ? 'Новости не найдены по заданному запросу' : 'Новости не найдены'}
                           </td>
                         </tr>
                       ) : (
-                        news.map((item) => (
+                        getCurrentPageItems().map((item, index) => (
                           <tr key={item.id}>
+                            <td>{getItemIndex(index)}</td>
                             <td>{item.title}</td>
                             <td>{new Date(item.date).toLocaleDateString('ru-RU')}</td>
                             <td>
@@ -299,6 +457,60 @@ export default function NewsManagement() {
                     </tbody>
                   </table>
                 </div>
+                
+                {/* Пагинация */}
+                {!loading && filteredNews.length > 0 && (
+                  <div className="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                      <small className="text-muted">
+                        Показано: {getDisplayRange()}
+                      </small>
+                    </div>
+                    <nav aria-label="Навигация по страницам">
+                      <ul className="pagination pagination-sm mb-0">
+                        <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                          <button
+                            className="page-link"
+                            onClick={() => paginate(currentPage - 1)}
+                            disabled={currentPage === 1}
+                          >
+                            <i className="bi bi-chevron-left"></i>
+                          </button>
+                        </li>
+                        
+                        {getPageNumbers().map((page, index) => (
+                          page === '...' ? (
+                            <li key={`ellipsis-${index}`} className="page-item disabled">
+                              <span className="page-link">...</span>
+                            </li>
+                          ) : (
+                            <li 
+                              key={page} 
+                              className={`page-item ${currentPage === page ? 'active' : ''}`}
+                            >
+                              <button
+                                className="page-link"
+                                onClick={() => paginate(page)}
+                              >
+                                {page}
+                              </button>
+                            </li>
+                          )
+                        ))}
+                        
+                        <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                          <button
+                            className="page-link"
+                            onClick={() => paginate(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                          >
+                            <i className="bi bi-chevron-right"></i>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                )}
               </div>
             </div>
           </div>

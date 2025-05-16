@@ -2,11 +2,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 
-// Захардкоженные учетные данные
-const ADMIN_CREDENTIALS = {
-  login: 'admin',
-  password: 'arctic2025olympiad'
-};
 
 // Функция для добавления лога
 const addLog = (action, user, status) => {
