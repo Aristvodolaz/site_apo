@@ -18,15 +18,15 @@ export default function Footer() {
       { title: 'Химия', href: '/subjects/chemistry' }
     ],
     participants: [
-      { title: 'Регистрация', href: '/register' },
-      { title: 'Расписание', href: '/schedule' },
+      // { title: 'Регистрация', href: '/register' },
+      // { title: 'Расписание', href: '/schedule' },
       { title: 'Документы', href: '/documents' },
       { title: 'Новости', href: '/news' }
     ],
     social: [
-      { title: 'VK', href: '#', icon: 'linkedin' },
+      { title: 'VK', href: '#', icon: 'chat' },
       { title: 'Telegram', href: '#', icon: 'telegram' },
-      { title: 'YouTube', href: '#', icon: 'youtube' }
+      // { title: 'YouTube', href: '#', icon: 'youtube' }
     ]
   };
 

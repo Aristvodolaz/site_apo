@@ -4,6 +4,7 @@ import AdminLayout from '../../components/admin/AdminLayout';
 
 export default function AdminsPage() {
   const [admins, setAdmins] = useState([]);
+  const [filteredAdmins, setFilteredAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
@@ -15,6 +16,9 @@ export default function AdminsPage() {
   const [formVisible, setFormVisible] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const router = useRouter();
 
   // Загрузка списка администраторов
@@ -29,6 +33,7 @@ export default function AdminsPage() {
       
       const data = await response.json();
       setAdmins(data.admins || []);
+      setFilteredAdmins(data.admins || []);
     } catch (error) {
       console.error('Ошибка при загрузке администраторов:', error);
       setError('Не удалось загрузить список администраторов. Пожалуйста, попробуйте позже.');
@@ -40,6 +45,41 @@ export default function AdminsPage() {
   useEffect(() => {
     fetchAdmins();
   }, []);
+
+  // Фильтрация администраторов при изменении поискового запроса
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredAdmins(admins);
+    } else {
+      const filtered = admins.filter(admin => 
+        admin.login.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        admin.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredAdmins(filtered);
+    }
+    setCurrentPage(1); // Сбрасываем на первую страницу при поиске
+  }, [searchTerm, admins]);
+
+  // Обработка изменения поискового запроса
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Получение текущей страницы администраторов
+  const getCurrentPageItems = () => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return filteredAdmins.slice(indexOfFirstItem, indexOfLastItem);
+  };
+
+  // Изменение страницы
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Изменение количества элементов на странице
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Сбрасываем на первую страницу
+  };
 
   // Обработка отправки формы добавления администратора
   const handleSubmit = async (e) => {
@@ -129,6 +169,69 @@ export default function AdminsPage() {
       console.error('Ошибка при удалении администратора:', error);
       setError('Не удалось удалить администратора. Пожалуйста, попробуйте позже.');
     }
+  };
+
+  // Расчет индекса записи для отображения нумерации
+  const getItemIndex = (index) => {
+    return (currentPage - 1) * itemsPerPage + index + 1;
+  };
+
+  // Получение общего количества страниц
+  const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+
+  // Генерация массива страниц для пагинации
+  const getPageNumbers = () => {
+    const maxPagesToShow = 5;
+    const pages = [];
+    
+    if (totalPages <= maxPagesToShow) {
+      // Если страниц меньше или равно maxPagesToShow, показываем все
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Сложная логика для больших списков страниц
+      let startPage = Math.max(currentPage - Math.floor(maxPagesToShow / 2), 1);
+      let endPage = startPage + maxPagesToShow - 1;
+      
+      if (endPage > totalPages) {
+        endPage = totalPages;
+        startPage = Math.max(endPage - maxPagesToShow + 1, 1);
+      }
+      
+      // Добавляем первую страницу и многоточие
+      if (startPage > 1) {
+        pages.push(1);
+        if (startPage > 2) {
+          pages.push('...');
+        }
+      }
+      
+      // Добавляем основные страницы
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Добавляем многоточие и последнюю страницу
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          pages.push('...');
+        }
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
+  // Вычисление диапазона отображаемых элементов
+  const getDisplayRange = () => {
+    if (filteredAdmins.length === 0) return '0-0 из 0';
+    
+    const start = (currentPage - 1) * itemsPerPage + 1;
+    const end = Math.min(currentPage * itemsPerPage, filteredAdmins.length);
+    
+    return `${start}-${end} из ${filteredAdmins.length}`;
   };
 
   return (
@@ -262,6 +365,60 @@ export default function AdminsPage() {
           </div>
         )}
 
+        {/* Поиск и фильтры */}
+        <div className="row mb-4">
+          <div className="col-md-6">
+            <div className="input-group">
+              <span className="input-group-text bg-light">
+                <i className="bi bi-search text-muted"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Поиск по логину или имени..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              {searchTerm && (
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  title="Очистить"
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="col-md-3 ms-auto">
+            <div className="d-flex align-items-center justify-content-end">
+              <label htmlFor="itemsPerPage" className="form-label mb-0 me-2">
+                Показывать по:
+              </label>
+              <select
+                id="itemsPerPage"
+                className="form-select form-select-sm"
+                value={itemsPerPage}
+                onChange={handleItemsPerPageChange}
+                style={{ width: 'auto' }}
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {searchTerm && (
+          <div className="alert alert-info mb-4">
+            <i className="bi bi-info-circle me-2"></i>
+            По запросу <strong>"{searchTerm}"</strong> найдено: {filteredAdmins.length}
+          </div>
+        )}
+
         <div className="card shadow-sm">
           <div className="card-body">
             {loading ? (
@@ -271,27 +428,29 @@ export default function AdminsPage() {
                 </div>
                 <p className="mt-3 text-muted">Загрузка списка администраторов...</p>
               </div>
-            ) : admins.length === 0 ? (
+            ) : filteredAdmins.length === 0 ? (
               <div className="text-center py-5">
                 <i className="bi bi-people fs-1 text-muted"></i>
-                <p className="mt-3">Нет зарегистрированных администраторов</p>
+                <p className="mt-3">{searchTerm ? 'Администраторы не найдены по заданному запросу' : 'Нет зарегистрированных администраторов'}</p>
               </div>
             ) : (
               <div className="table-responsive">
                 <table className="table table-hover">
                   <thead className="table-light">
                     <tr>
-                      <th scope="col">Логин</th>
-                      <th scope="col">Имя</th>
-                      <th scope="col">Роль</th>
-                      <th scope="col">Последний вход</th>
-                      <th scope="col">Статус</th>
-                      <th scope="col">Действия</th>
+                      <th scope="col" style={{ width: '5%' }}>#</th>
+                      <th scope="col" style={{ width: '15%' }}>Логин</th>
+                      <th scope="col" style={{ width: '20%' }}>Имя</th>
+                      <th scope="col" style={{ width: '15%' }}>Роль</th>
+                      <th scope="col" style={{ width: '20%' }}>Последний вход</th>
+                      <th scope="col" style={{ width: '10%' }}>Статус</th>
+                      <th scope="col" style={{ width: '15%' }}>Действия</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {admins.map(admin => (
+                    {getCurrentPageItems().map((admin, index) => (
                       <tr key={admin.id}>
+                        <td>{getItemIndex(index)}</td>
                         <td>{admin.login}</td>
                         <td>{admin.name}</td>
                         <td>
@@ -328,6 +487,60 @@ export default function AdminsPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Пагинация */}
+            {!loading && filteredAdmins.length > 0 && (
+              <div className="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                  <small className="text-muted">
+                    Показано: {getDisplayRange()}
+                  </small>
+                </div>
+                <nav aria-label="Навигация по страницам">
+                  <ul className="pagination pagination-sm mb-0">
+                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                      <button
+                        className="page-link"
+                        onClick={() => paginate(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
+                        <i className="bi bi-chevron-left"></i>
+                      </button>
+                    </li>
+                    
+                    {getPageNumbers().map((page, index) => (
+                      page === '...' ? (
+                        <li key={`ellipsis-${index}`} className="page-item disabled">
+                          <span className="page-link">...</span>
+                        </li>
+                      ) : (
+                        <li 
+                          key={page} 
+                          className={`page-item ${currentPage === page ? 'active' : ''}`}
+                        >
+                          <button
+                            className="page-link"
+                            onClick={() => paginate(page)}
+                          >
+                            {page}
+                          </button>
+                        </li>
+                      )
+                    ))}
+                    
+                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                      <button
+                        className="page-link"
+                        onClick={() => paginate(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
+                        <i className="bi bi-chevron-right"></i>
+                      </button>
+                    </li>
+                  </ul>
+                </nav>
               </div>
             )}
           </div>
