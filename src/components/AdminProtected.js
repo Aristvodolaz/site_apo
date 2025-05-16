@@ -27,11 +27,12 @@ export default function AdminProtected({ children }) {
 
   if (loading) {
     return (
-      <div className="container py-5">
+      <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
         <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
+          <div className="spinner-border text-primary mb-3" style={{ width: '3rem', height: '3rem' }} role="status">
             <span className="visually-hidden">Загрузка...</span>
           </div>
+          <p className="text-muted mb-0">Проверка доступа к административной панели...</p>
         </div>
       </div>
     );
