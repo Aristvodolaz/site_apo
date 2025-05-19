@@ -13,6 +13,7 @@ export default function Diplomas() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState('all'); // 'all', 'fio', 'number'
   const [activeSubject, setActiveSubject] = useState('all');
+  const [isLoaded, setIsLoaded] = useState(false);
   
   // Добавляем состояния для пагинации
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,6 +59,7 @@ export default function Diplomas() {
         setError("Не удалось загрузить данные дипломов. Пожалуйста, попробуйте позже.");
       } finally {
         setLoading(false);
+        setIsLoaded(true);
       }
     }
     
@@ -192,23 +194,27 @@ export default function Diplomas() {
   };
 
   return (
-    <Layout>
-      <Head>
-        <title>Дипломы | Арктическая олимпиада</title>
-        <meta 
-          name="description" 
-          content="Поиск дипломов победителей и призеров Арктической олимпиады «Полярный круг»"
-        />
-      </Head>
-      
-      <div className="diplomas-page">
-        <div className="page-header">
-          <PageHeader 
-            title="Дипломы" 
-            subtitle="Поиск и просмотр дипломов победителей и призеров Арктической олимпиады «Полярный круг»"
-          />
+    <Layout title="Дипломы | Арктическая олимпиада">
+      <section className="history-hero">
+        <div className="history-hero-bg"></div>
+        <div className="container py-5 position-relative z-index-1">
+          <div className="row justify-content-center text-center">
+            <div className="col-lg-8">
+              <h1 className={`history-title animate-on-scroll ${isLoaded ? 'visible' : ''}`}>
+                Дипломы 
+              </h1>
+              <p className={`history-subtitle animate-on-scroll ${isLoaded ? 'visible' : ''}`}>
+                Поиск дипломов победителей и призеров Арктической олимпиады «Полярный круг»
+              </p>
+            </div>
+          </div>
         </div>
-
+        <div className="history-wave-container">
+          <div className="history-wave"></div>
+        </div>
+      </section>
+      
+      <div className="diplomas-page ">
         <div className="content-wrapper">
           <div className="container">
             <div className="search-section">
@@ -418,6 +424,7 @@ export default function Diplomas() {
 
       <style jsx>{`
         .diplomas-page {
+          padding-top: 3rem !important;
           min-height: 100vh;
           background: linear-gradient(180deg, #f7fafc 0%, #edf2f7 100%);
         }
