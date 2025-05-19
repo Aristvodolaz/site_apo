@@ -191,4 +191,192 @@ export const migrateDataToFirestore = async (data) => {
     console.error('Ошибка при миграции данных:', error);
     throw error;
   }
+};
+
+/**
+ * Сервис для работы с дипломами
+ */
+export const diplomasService = {
+  // Получение всех дипломов
+  getAllDiplomas: async () => {
+    try {
+      const diplomasRef = collection(db, 'diplomas');
+      const q = query(diplomasRef, orderBy('fio', 'asc'));
+      const snapshot = await getDocs(q);
+      
+      console.log('Diplomas data loaded:', snapshot.docs.length, 'records');
+      
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      console.log('Sample diploma data:', data.length > 0 ? data[0] : 'No data');
+      
+      return data;
+    } catch (error) {
+      console.error('Ошибка при получении дипломов:', error);
+      throw error;
+    }
+  },
+
+  // Поиск дипломов по ФИО или номеру
+  searchDiplomas: async (searchTerm) => {
+    try {
+      const diplomasRef = collection(db, 'diplomas');
+      const snapshot = await getDocs(diplomasRef);
+      
+      const term = searchTerm.toLowerCase().trim();
+      
+      // Фильтрация на клиентской стороне, так как Firestore не поддерживает
+      // полнотекстовый поиск без дополнительных индексов
+      return snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(diploma => 
+          diploma.fio.toLowerCase().includes(term) || 
+          (diploma.number && diploma.number.toLowerCase().includes(term))
+        );
+    } catch (error) {
+      console.error('Ошибка при поиске дипломов:', error);
+      throw error;
+    }
+  },
+  
+  // Поиск дипломов по предмету
+  getDiplomasBySubject: async (subject) => {
+    try {
+      if (!subject || subject === 'all') {
+        return diplomasService.getAllDiplomas();
+      }
+      
+      const diplomasRef = collection(db, 'diplomas');
+      const snapshot = await getDocs(diplomasRef);
+      
+      // Фильтрация на клиентской стороне
+      return snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(diploma => 
+          diploma.subject && 
+          diploma.subject.toLowerCase() === subject.toLowerCase()
+        );
+    } catch (error) {
+      console.error('Ошибка при получении дипломов по предмету:', error);
+      throw error;
+    }
+  },
+
+  // Добавление нового диплома
+  addDiploma: async (diplomaData) => {
+    try {
+      const data = {
+        ...diplomaData,
+        created_at: serverTimestamp()
+      };
+      
+      const diplomasRef = collection(db, 'diplomas');
+      const docRef = await addDoc(diplomasRef, data);
+      
+      return {
+        id: docRef.id,
+        ...data
+      };
+    } catch (error) {
+      console.error('Ошибка при добавлении диплома:', error);
+      throw error;
+    }
+  },
+
+  // Обновление диплома
+  updateDiploma: async (id, diplomaData) => {
+    try {
+      // Добавляем timestamp для updated_at
+      const data = {
+        ...diplomaData,
+        updated_at: serverTimestamp()
+      };
+      
+      const docRef = doc(db, 'diplomas', id);
+      await setDoc(docRef, data, { merge: true });
+      
+      return {
+        id,
+        ...data
+      };
+    } catch (error) {
+      console.error(`Ошибка при обновлении диплома ${id}:`, error);
+      throw error;
+    }
+  },
+  
+  // Удаление диплома
+  deleteDiploma: async (id) => {
+    try {
+      const docRef = doc(db, 'diplomas', id);
+      await deleteDoc(docRef);
+      
+      return { id, success: true };
+    } catch (error) {
+      console.error(`Ошибка при удалении диплома ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Массовое добавление дипломов
+  addBulkDiplomas: async (diplomasArray) => {
+    try {
+      const diplomasRef = collection(db, 'diplomas');
+      const results = [];
+      
+      for (const diplomaData of diplomasArray) {
+        const data = {
+          ...diplomaData,
+          created_at: serverTimestamp()
+        };
+        
+        const docRef = await addDoc(diplomasRef, data);
+        results.push({
+          id: docRef.id,
+          ...data
+        });
+      }
+      
+      return results;
+    } catch (error) {
+      console.error('Ошибка при массовом добавлении дипломов:', error);
+      throw error;
+    }
+  },
+
+  // Проверка подключения к Firebase
+  checkFirebaseConnection: async () => {
+    try {
+      if (!db) {
+        return { 
+          success: false, 
+          message: 'Firebase не инициализирован' 
+        };
+      }
+      
+      // Простой запрос для проверки соединения
+      const diplomasRef = collection(db, 'diplomas');
+      const snapshot = await getDocs(diplomasRef);
+      
+      return { 
+        success: true, 
+        message: `Соединение успешно. Найдено ${snapshot.docs.length} записей.` 
+      };
+    } catch (error) {
+      console.error('Ошибка при проверке соединения:', error);
+      return { 
+        success: false, 
+        message: `Ошибка соединения: ${error.message}` 
+      };
+    }
+  }
 }; 

@@ -80,6 +80,12 @@ export default function AdminLayout({ children }) {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link href="/admin/diplomas" className={`nav-link ${router.pathname.startsWith('/admin/diplomas') ? 'active' : ''}`}>
+                  <i className="bi bi-award me-2"></i>
+                  Управление дипломами
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link href="/admin/migrate" className={`nav-link ${router.pathname === '/admin/migrate' ? 'active' : ''}`}>
                   <i className="bi bi-arrow-left-right me-2"></i>
                   Миграция данных

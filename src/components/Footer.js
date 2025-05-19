@@ -8,7 +8,7 @@ export default function Footer() {
     about: [
       { title: 'История олимпиады', href: '/about/history' },
       { title: 'Архив заданий', href: '/about/archive' },
-      { title: 'Организаторы', href: '/about/organizers' },
+      // { title: 'Организаторы', href: '/about/organizers' },
       { title: 'Контакты', href: '/contacts' }
     ],
     subjects: [
@@ -119,7 +119,7 @@ export default function Footer() {
                 </li>
                 <li>
                   <i className="bi bi-geo-alt"></i>
-                  <span>г. Салехард, ул. Ленина, 1</span>
+                  <span>г. Салехард,<br></br> ул. Ленина, 1</span>
                 </li>
               </ul>
             </div>

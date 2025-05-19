@@ -13,6 +13,14 @@ export default function AdminDashboard() {
     approved: 0,
     rejected: 0
   });
+  
+  const [diplomaStats, setDiplomaStats] = useState({
+    total: 0,
+    mathematics: 0,
+    physics: 0,
+    chemistry: 0,
+    biology: 0
+  });
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -36,6 +44,30 @@ export default function AdminDashboard() {
         });
 
         setStats(newStats);
+        
+        // Получение статистики по дипломам
+        const diplomasRef = collection(db, 'diplomas');
+        const diplomasSnapshot = await getDocs(query(diplomasRef));
+        
+        const newDiplomaStats = {
+          total: 0,
+          mathematics: 0,
+          physics: 0,
+          chemistry: 0,
+          biology: 0
+        };
+        
+        diplomasSnapshot.forEach((doc) => {
+          const data = doc.data();
+          newDiplomaStats.total++;
+          
+          if (data.subject === 'математика') newDiplomaStats.mathematics++;
+          if (data.subject === 'физика') newDiplomaStats.physics++;
+          if (data.subject === 'химия') newDiplomaStats.chemistry++;
+          if (data.subject === 'биология') newDiplomaStats.biology++;
+        });
+        
+        setDiplomaStats(newDiplomaStats);
       } catch (error) {
         console.error('Ошибка при загрузке статистики:', error);
       }
@@ -54,27 +86,27 @@ export default function AdminDashboard() {
       bgColor: 'rgba(var(--bs-primary-rgb), 0.1)'
     },
     {
+      title: 'Управление дипломами',
+      description: 'Добавление и поиск по дипломам',
+      icon: 'award',
+      color: 'success',
+      link: '/admin/diplomas',
+      bgColor: 'rgba(var(--bs-success-rgb), 0.1)'
+    },
+    {
       title: 'Новости',
       description: 'Управление новостями и публикациями',
       icon: 'newspaper',
-      color: 'success',
+      color: 'info',
       link: '/admin/news',
-      bgColor: 'rgba(var(--bs-success-rgb), 0.1)'
+      bgColor: 'rgba(var(--bs-info-rgb), 0.1)'
     },
     {
       title: 'Журнал действий',
       description: 'История входов и действий в системе',
       icon: 'journal-text',
-      color: 'info',
-      link: '/admin/logs',
-      bgColor: 'rgba(var(--bs-info-rgb), 0.1)'
-    },
-    {
-      title: 'Настройки',
-      description: 'Управление системными настройками',
-      icon: 'gear',
       color: 'secondary',
-      link: '/admin/settings',
+      link: '/admin/logs',
       bgColor: 'rgba(var(--bs-secondary-rgb), 0.1)'
     }
   ];
@@ -109,6 +141,37 @@ export default function AdminDashboard() {
       bgColor: 'rgba(var(--bs-danger-rgb), 0.1)'
     }
   ];
+  
+  const diplomaStatCards = [
+    {
+      title: 'Всего дипломов',
+      value: diplomaStats.total,
+      icon: 'award-fill',
+      color: 'success',
+      bgColor: 'rgba(var(--bs-success-rgb), 0.1)'
+    },
+    {
+      title: 'Математика',
+      value: diplomaStats.mathematics,
+      icon: 'calculator',
+      color: 'primary',
+      bgColor: 'rgba(var(--bs-primary-rgb), 0.1)'
+    },
+    {
+      title: 'Физика',
+      value: diplomaStats.physics,
+      icon: 'lightning',
+      color: 'warning',
+      bgColor: 'rgba(var(--bs-warning-rgb), 0.1)'
+    },
+    {
+      title: 'Химия / Биология',
+      value: diplomaStats.chemistry + diplomaStats.biology,
+      icon: 'droplet-fill',
+      color: 'info',
+      bgColor: 'rgba(var(--bs-info-rgb), 0.1)'
+    }
+  ];
 
   return (
     <AdminProtected>
@@ -125,7 +188,8 @@ export default function AdminDashboard() {
               </ol>
             </nav>
 
-            {/* Статистика */}
+            {/* Статистика по участникам */}
+            <h4 className="mb-3 side-bordered-header">Статистика по участникам</h4>
             <div className="row g-4 mb-5">
               {statCards.map((stat, index) => (
                 <div key={index} className="col-md-6 col-xl-3">
@@ -164,8 +228,50 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+            
+            {/* Статистика по дипломам */}
+            <h4 className="mb-3 side-bordered-header">Статистика по дипломам</h4>
+            <div className="row g-4 mb-5">
+              {diplomaStatCards.map((stat, index) => (
+                <div key={index} className="col-md-6 col-xl-3">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 + index * 0.1 }}
+                    whileHover={{ 
+                      scale: 1.02,
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.1)'
+                    }}
+                    className="card border-0 shadow-sm h-100 rounded-4 overflow-hidden"
+                  >
+                    <div className="card-body p-4">
+                      <div className="d-flex align-items-center">
+                        <div 
+                          className="rounded-4 me-3 d-flex align-items-center justify-content-center"
+                          style={{ 
+                            width: '56px', 
+                            height: '56px',
+                            backgroundColor: stat.bgColor,
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          <i className={`bi bi-${stat.icon} fs-3`} style={{ color: `var(--bs-${stat.color})` }}></i>
+                        </div>
+                        <div>
+                          <h6 className="card-subtitle mb-2 text-muted small text-uppercase">{stat.title}</h6>
+                          <h2 className="card-title mb-0 fw-bold display-6" style={{ color: `var(--bs-${stat.color})` }}>
+                            {stat.value}
+                          </h2>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              ))}
+            </div>
 
             {/* Меню */}
+            <h4 className="mb-3 side-bordered-header">Управление</h4>
             <div className="row g-4">
               {menuItems.map((item, index) => (
                 <div key={index} className="col-md-6 col-xl-3">
@@ -224,6 +330,14 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+        
+        <style jsx>{`
+          .side-bordered-header {
+            position: relative;
+            padding-left: 1rem;
+            border-left: 4px solid #0d6efd;
+          }
+        `}</style>
       </Layout>
     </AdminProtected>
   );

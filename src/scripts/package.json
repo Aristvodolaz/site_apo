@@ -1,0 +1,9 @@
+{
+  "name": "diplomas-uploader",
+  "version": "1.0.0",
+  "description": "Script to upload diplomas data to Firebase",
+  "type": "module",
+  "dependencies": {
+    "firebase": "^11.7.3"
+  }
+} 

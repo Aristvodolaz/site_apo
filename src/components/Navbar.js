@@ -140,6 +140,15 @@ export default function Navbar() {
                 </a>
               </Link>
             </li>
+
+            <li className="nav-item">
+              <Link href="/diplomas" legacyBehavior>
+                <a className={`nav-link ${isActive('/diplomas')}`}>
+                  <span className="nav-link-text">Дипломы</span>
+                </a>
+              </Link>
+            </li>
+          
             <li className="nav-item">
               <Link href="/contacts" legacyBehavior>
                 <a className={`nav-link ${isActive('/contacts')}`}>
