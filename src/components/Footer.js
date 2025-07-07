@@ -7,7 +7,7 @@ export default function Footer() {
   const footerLinks = {
     about: [
       { title: 'История олимпиады', href: '/about/history' },
-      { title: 'Архив заданий', href: '/about/archive' },
+      // { title: 'Архив заданий', href: '/about/archive' },
       // { title: 'Организаторы', href: '/about/organizers' },
       { title: 'Контакты', href: '/contacts' }
     ],
@@ -24,8 +24,8 @@ export default function Footer() {
       { title: 'Новости', href: '/news' }
     ],
     social: [
-      { title: 'VK', href: '#', icon: 'chat' },
-      { title: 'Telegram', href: '#', icon: 'telegram' },
+      // { title: 'VK', href: '#', icon: 'chat' },
+      // { title: 'Telegram', href: '#', icon: 'telegram' },
       // { title: 'YouTube', href: '#', icon: 'youtube' }
     ]
   };
@@ -113,14 +113,6 @@ export default function Footer() {
                   <i className="bi bi-envelope"></i>
                   <a href="mailto:info@arctic-olymp.ru">info@arctic-olymp.ru</a>
                 </li>
-                <li>
-                  <i className="bi bi-telephone"></i>
-                  <a href="tel:+7-800-000-00-00">8 800 000 00 00</a>
-                </li>
-                <li>
-                  <i className="bi bi-geo-alt"></i>
-                  <span>г. Салехард,<br></br> ул. Ленина, 1</span>
-                </li>
               </ul>
             </div>
           </div>
@@ -135,12 +127,10 @@ export default function Footer() {
               © {currentYear} Арктическая олимпиада. Все права защищены.
             </div>
             <div className="footer-links-secondary">
-              <Link href="/privacy" legacyBehavior>
+              <Link href="https://drive.google.com/file/d/1GYfVoYCsmM1US4B-TbDpLYOcphbdsUpw/view?usp=drive_link" legacyBehavior>
                 <a>Политика конфиденциальности</a>
               </Link>
-              <Link href="/terms" legacyBehavior>
-                <a>Условия использования</a>
-              </Link>
+          
             </div>
           </div>
         </div>

@@ -1,17 +1,80 @@
 import Layout from '../../components/Layout';
 import PageHeader from '../../components/PageHeader';
 import Link from 'next/link';
-import { subjectsData } from '../../data/subjectsData';
+import { subjectsService } from '../../lib/firebaseService';
+import { db } from '../../lib/firebase';
 import { useEffect, useState } from 'react';
 
 export default function MathSubject() {
-  // Get math data from the subjectsData
-  const mathData = subjectsData.find(subject => subject.id === 'math');
+  const [mathData, setMathData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+    
+    // Загружаем данные математики из Firebase
+    async function fetchMathData() {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        console.log('Начинаем загрузку данных математики...');
+        console.log('Firebase db объект:', db);
+        
+        if (!db) {
+          throw new Error('Firebase не инициализирован');
+        }
+        
+        // Получаем данные предмета математики из Firebase
+        const data = await subjectsService.getSubjectById('0'); // Математика имеет ID '0' в Firebase
+        console.log('Math data loaded from Firebase:', data);
+        
+        if (data) {
+          setMathData(data);
+        } else {
+          setError('Данные по математике не найдены.');
+        }
+      } catch (err) {
+        console.error("Ошибка при загрузке данных математики:", err);
+        console.error("Детали ошибки:", err.message);
+        setError(`Не удалось загрузить данные: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchMathData();
   }, []);
+
+  if (loading) {
+    return (
+      <Layout title="Математика">
+        <div className="container py-5">
+          <div className="text-center">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Загрузка...</span>
+            </div>
+            <p className="mt-3 text-muted">Загружаем данные...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !mathData) {
+    return (
+      <Layout title="Математика">
+        <div className="container py-5">
+          <div className="alert alert-danger" role="alert">
+            <i className="bi bi-exclamation-triangle me-2"></i>
+            {error || 'Данные не найдены'}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Математика">
@@ -19,8 +82,8 @@ export default function MathSubject() {
         <div className="container py-5 position-relative z-index-1">
           <div className="row align-items-center">
             <div className="col-lg-8">
-              <h1 className="text-white display-4 fw-bold mb-3">Математика</h1>
-              <p className="text-white opacity-90 lead mb-4">Олимпиада по математике для учащихся 4-11 классов</p>
+              <h1 className="text-white display-4 fw-bold mb-3">{mathData.title}</h1>
+              <p className="text-white opacity-90 lead mb-4">{mathData.shortDescription}</p>
               <div className="d-flex flex-wrap gap-3">
                 <Link href="/register" legacyBehavior>
                   <a className="hero-btn-primary">
@@ -33,7 +96,7 @@ export default function MathSubject() {
             <div className="col-lg-4 d-none d-lg-block">
               <div className="subject-icon-wrapper">
                 <div className="subject-icon-container">
-                  <i className="bi bi-calculator subject-icon-large"></i>
+                  <i className={`bi bi-${mathData.icon} subject-icon-large`}></i>
                   <div className="subject-icon-glow"></div>
                 </div>
               </div>
@@ -71,7 +134,7 @@ export default function MathSubject() {
         <div className="row g-4">
           <div className="col-lg-8">
             <section className="mb-5">
-              <h2 className="section-title mb-4">О профиле «Математика»</h2>
+              <h2 className="section-title mb-4">О профиле «{mathData.title}»</h2>
               <p className="lead">{mathData.description}</p>
               
               <div className="row mt-4 g-4">
@@ -82,7 +145,7 @@ export default function MathSubject() {
                       <i className="bi bi-mortarboard"></i>
                     </div>
                     <h4 className="subject-info-title">Классы</h4>
-                    <p className="subject-info-text">{mathData.grades.join(', ')} классы</p>
+                    <p className="subject-info-text">{mathData.grades?.join(', ')} классы</p>
                   </div>
                 </div>
                 
@@ -94,7 +157,9 @@ export default function MathSubject() {
                     </div>
                     <h4 className="subject-info-title">Площадки проведения</h4>
                     <p className="subject-info-text">
-                      {mathData.locations ? mathData.locations.join(', ') : 'Информация будет доступна позже'}
+                      {mathData.locations && mathData.locations.length > 0 
+                        ? mathData.locations.join(', ') 
+                        : 'Информация будет доступна позже'}
                     </p>
                   </div>
                 </div>
@@ -135,7 +200,9 @@ export default function MathSubject() {
                         </div>
                         <div>
                           <div className="phase-label">Даты проведения</div>
-                          <div className="phase-value">{mathData.schedule.qualification.start} - {mathData.schedule.qualification.end}</div>
+                          <div className="phase-value">
+                            {mathData.schedule?.qualification?.start} - {mathData.schedule?.qualification?.end}
+                          </div>
                         </div>
                       </div>
                       <div className="d-flex align-items-center mb-3">
@@ -144,7 +211,7 @@ export default function MathSubject() {
                         </div>
                         <div>
                           <div className="phase-label">Формат</div>
-                          <div className="phase-value">{mathData.schedule.qualification.format}</div>
+                          <div className="phase-value">{mathData.schedule?.qualification?.format}</div>
                         </div>
                       </div>
                       <div className="d-flex align-items-center">
@@ -153,7 +220,9 @@ export default function MathSubject() {
                         </div>
                         <div>
                           <div className="phase-label">Участники</div>
-                          <div className="phase-value">Все зарегистрированные школьники {mathData.grades.join(', ')} классов</div>
+                          <div className="phase-value">
+                            Все зарегистрированные школьники {mathData.grades?.join(', ')} классов
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -174,7 +243,9 @@ export default function MathSubject() {
                         </div>
                         <div>
                           <div className="phase-label">Даты проведения</div>
-                          <div className="phase-value">{mathData.schedule.final.start} - {mathData.schedule.final.end}</div>
+                          <div className="phase-value">
+                            {mathData.schedule?.final?.start} - {mathData.schedule?.final?.end}
+                          </div>
                         </div>
                       </div>
                       <div className="d-flex align-items-center mb-3">
@@ -183,7 +254,7 @@ export default function MathSubject() {
                         </div>
                         <div>
                           <div className="phase-label">Формат</div>
-                          <div className="phase-value">{mathData.schedule.final.format}</div>
+                          <div className="phase-value">{mathData.schedule?.final?.format}</div>
                         </div>
                       </div>
                       <div className="d-flex align-items-center">
@@ -215,25 +286,46 @@ export default function MathSubject() {
               
               {mathData.pastProblems && mathData.pastProblems.length > 0 ? (
                 <div className="past-problems-table">
-                  {mathData.pastProblems.map((year, index) => (
+                  {mathData.pastProblems.map((yearData, index) => (
                     <div key={index} className="past-problems-year-card">
-                      <div className="year-badge">{year.year}</div>
+                      <div className="year-badge">{yearData.year}</div>
                       <div className="past-problems-links">
-                        <a href={year.qualification} className="past-problems-link" target="_blank" rel="noopener noreferrer">
-                          <i className="bi bi-file-earmark-pdf me-2"></i>
-                          <span>Отборочный этап</span>
-                          <i className="bi bi-download ms-auto"></i>
-                        </a>
-                        <a href={year.final} className="past-problems-link" target="_blank" rel="noopener noreferrer">
-                          <i className="bi bi-file-earmark-pdf me-2"></i>
-                          <span>Заключительный этап</span>
-                          <i className="bi bi-download ms-auto"></i>
-                        </a>
-                        <a href={year.solutions} className="past-problems-link" target="_blank" rel="noopener noreferrer">
-                          <i className="bi bi-lightbulb me-2"></i>
-                          <span>Решения</span>
-                          <i className="bi bi-download ms-auto"></i>
-                        </a>
+                        {yearData.qualification && (
+                          <a 
+                            href={yearData.qualification} 
+                            className="past-problems-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <i className="bi bi-file-earmark-pdf me-2"></i>
+                            <span>Отборочный этап</span>
+                            <i className="bi bi-download ms-auto"></i>
+                          </a>
+                        )}
+                        {yearData.final && (
+                          <a 
+                            href={yearData.final} 
+                            className="past-problems-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <i className="bi bi-file-earmark-pdf me-2"></i>
+                            <span>Заключительный этап</span>
+                            <i className="bi bi-download ms-auto"></i>
+                          </a>
+                        )}
+                        {yearData.solutions && (
+                          <a 
+                            href={yearData.solutions} 
+                            className="past-problems-link" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                          >
+                            <i className="bi bi-lightbulb me-2"></i>
+                            <span>Решения</span>
+                            <i className="bi bi-download ms-auto"></i>
+                          </a>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -267,14 +359,18 @@ export default function MathSubject() {
                     <div className="timeline-badge"></div>
                     <div className="timeline-content">
                       <div className="timeline-title">Отборочный этап</div>
-                      <div className="timeline-date">01.11 - 15.11.2024</div>
+                      <div className="timeline-date">
+                        {mathData.schedule?.qualification?.start} - {mathData.schedule?.qualification?.end}
+                      </div>
                     </div>
                   </li>
                   <li className="sidebar-timeline-item">
                     <div className="timeline-badge"></div>
                     <div className="timeline-content">
                       <div className="timeline-title">Заключительный этап</div>
-                      <div className="timeline-date">10.02 - 20.02.2025</div>
+                      <div className="timeline-date">
+                        {mathData.schedule?.final?.start} - {mathData.schedule?.final?.end}
+                      </div>
                     </div>
                   </li>
                 </ul>
@@ -310,26 +406,7 @@ export default function MathSubject() {
                 </ul>
               </div>
                 
-              <div className="subject-sidebar-card">
-                <h3 className="sidebar-card-title">
-                  <i className="bi bi-envelope me-2"></i>
-                  Контакты
-                </h3>
-                <ul className="sidebar-contacts">
-                  <li>
-                    <a href="mailto:math@arctic-olympiad.ru" className="sidebar-contact-link">
-                      <i className="bi bi-envelope-fill"></i>
-                      <span>math@arctic-olympiad.ru</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="mailto:regions@apo-team.ru" className="sidebar-contact-link">
-                      <i className="bi bi-envelope-fill"></i>
-                      <span>regions@apo-team.ru</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
+             
                 
               <div className="d-grid gap-2 mt-4">
                 <Link href="/register" legacyBehavior>
@@ -338,12 +415,7 @@ export default function MathSubject() {
                     <span>Зарегистрироваться</span>
                   </a>
                 </Link>
-                <Link href="/about/archive" legacyBehavior>
-                  <a className="btn btn-outline-primary d-flex align-items-center justify-content-center">
-                    <i className="bi bi-archive me-2"></i>
-                    <span>Архив олимпиады</span>
-                  </a>
-                </Link>
+        
               </div>
             </div>
           </div>

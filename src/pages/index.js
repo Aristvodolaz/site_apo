@@ -3,9 +3,9 @@ import Layout from '../components/Layout';
 import NewsCard from '../components/NewsCard';
 import SubjectCard from '../components/SubjectCard';
 import Link from 'next/link';
-import { subjectsData } from '../data/subjectsData';
 import { useEffect, useState } from 'react';
 import { getNews } from '../lib/dataService';
+import { subjectsService } from '../lib/firebaseService';
 import OrganizersAndPartners from '../components/OrganizersAndPartners';
 
 export default function Home() {
@@ -21,9 +21,11 @@ export default function Home() {
   const [offsetY, setOffsetY] = useState(0);
   const handleScroll = () => setOffsetY(window.pageYOffset);
 
-  // Состояние для новостей
+  // Состояние для новостей и предметов
   const [news, setNews] = useState([]);
+  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [subjectsLoading, setSubjectsLoading] = useState(true);
   
   // Инициализируем эффект при монтировании компонента
   useEffect(() => {
@@ -42,7 +44,22 @@ export default function Home() {
       }
     };
 
+    // Загружаем предметы из Firebase
+    const fetchSubjects = async () => {
+      try {
+        const subjectsData = await subjectsService.getAllSubjects();
+        console.log('Subjects loaded from Firebase:', subjectsData);
+        setSubjects(Array.isArray(subjectsData) ? subjectsData : []);
+      } catch (err) {
+        console.error('Error fetching subjects:', err);
+        setSubjects([]);
+      } finally {
+        setSubjectsLoading(false);
+      }
+    };
+
     fetchNews();
+    fetchSubjects();
     
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -150,9 +167,7 @@ export default function Home() {
           <div className="row">
             <div className="col-lg-8 mx-auto text-center">
               <p className="lead">
-                Арктическая олимпиада «Полярный круг» проводится с 2020 года. 
-                За это время из небольшой региональной олимпиады по математике она выросла во всероссийское соревнование 
-                по четырем предметам с участниками из более чем 70 регионов России.
+              Арктическая олимпиада «Полярный круг» стартовала в 2020 году как небольшое региональное состязание по математике. Сегодня это масштабная всероссийская олимпиада по четырем предметам, объединяющая участников из более чем 70 регионов России и стран СНГ — Беларуси, Молдовы, Кыргызстана и Узбекистана.
               </p>
               <p className="mb-4">
                 Важный принцип, по которому проводится олимпиада — это составление заданий для учащихся младших классов (4-6 классы), 
@@ -174,19 +189,31 @@ export default function Home() {
               <h2 className="section-heading side-bordered-header mb-0">Профили олимпиады</h2>
             </div>
           </div>
-          <div className="row g-4">
-            {subjectsData.map((subject) => (
-              <div key={subject.id} className="col-md-6 col-lg-3">
-                <SubjectCard
-                  title={subject.title}
-                  description={subject.shortDescription}
-                  icon={subject.icon}
-                  link={subject.link}
-                  color={subject.color}
-                />
+          {subjectsLoading ? (
+            <div className="d-flex justify-content-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Загрузка предметов...</span>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : subjects.length > 0 ? (
+            <div className="row g-4">
+              {subjects.map((subject) => (
+                <div key={subject.id} className="col-md-6 col-lg-3">
+                  <SubjectCard
+                    title={subject.title}
+                    description={subject.shortDescription}
+                    icon={subject.icon}
+                    link={subject.link}
+                    color={subject.color}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="alert alert-info">
+              Предметы пока не загружены
+            </div>
+          )}
         </div>
       </section>
 

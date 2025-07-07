@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="128" fill="#0D6EFD"/>
+  
+  <!-- Снежинка -->
+  <g transform="translate(256, 256)">
+    <!-- Основные лучи -->
+    <path d="M0 -180L0 180M-155.88 -90L155.88 90M155.88 -90L-155.88 90" 
+          stroke="white" stroke-width="24" stroke-linecap="round"/>
+    
+    <!-- Декоративные элементы -->
+    <circle cx="0" cy="0" r="40" fill="white"/>
+    <circle cx="0" cy="-180" r="20" fill="white"/>
+    <circle cx="0" cy="180" r="20" fill="white"/>
+    <circle cx="-155.88" cy="-90" r="20" fill="white"/>
+    <circle cx="155.88" cy="-90" r="20" fill="white"/>
+    <circle cx="-155.88" cy="90" r="20" fill="white"/>
+    <circle cx="155.88" cy="90" r="20" fill="white"/>
+  </g>
+  
+  <!-- Буква А -->
+  <path d="M256 140L356 372H156L256 140Z" 
+        stroke="white" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M206 292H306" 
+        stroke="white" stroke-width="24" stroke-linecap="round"/>
+</svg> 

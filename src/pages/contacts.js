@@ -34,18 +34,7 @@ export default function Contacts() {
                         </div>
                       </div>
                       
-                      {olympiadContacts.registrationHelp && (
-                        <div className="d-flex mb-0 align-items-center contact-item">
-                          <div className="text-primary me-3">
-                            <i className="bi bi-telephone-fill fs-4 pulse"></i>
-                          </div>
-                          <div>
-                            <h5 className="mb-1">Горячая линия</h5>
-                            <p className="mb-0 fw-medium">{olympiadContacts.registrationHelp}</p>
-                            <small className="text-muted">По вопросам регистрации</small>
-                          </div>
-                        </div>
-                      )}
+
                     </div>
                     
                     <div className="col-md-6">
@@ -96,14 +85,7 @@ export default function Contacts() {
                         </div>
                       </div>
                       
-                      <div className="d-flex mb-3 align-items-center contact-item">
-                        <div className="text-primary me-3">
-                          <i className="bi bi-telephone-fill"></i>
-                        </div>
-                        <div>
-                          <p className="mb-0">{mainOrganizer.phone}</p>
-                        </div>
-                      </div>
+                    
                       
                       <div className="d-flex mb-3 align-items-center contact-item">
                         <div className="text-primary me-3">
@@ -160,16 +142,7 @@ export default function Contacts() {
                           </div>
                         </div>
                         
-                        <div className="d-flex align-items-center contact-item">
-                          <div className="text-primary me-3">
-                            <i className="bi bi-envelope-fill"></i>
-                          </div>
-                          <div>
-                            <a href={`mailto:${partner.email}`} className="text-decoration-none contact-link">
-                              {partner.email}
-                            </a>
-                          </div>
-                        </div>
+            
                       </div>
                     </div>
                   </div>
@@ -177,21 +150,7 @@ export default function Contacts() {
               </div>
             </section>
             
-            {/* Subject coordinators */}
-            <section className="mb-5 fade-in" style={{animationDelay: "0.6s"}}>
-              <h2 className="mb-4">Координаторы по предметам</h2>
-              <div className="coordinators-grid">
-                {subjectCoordinators.map((coordinator, index) => (
-                  <div key={index} className="coordinator-card">
-                    <div className="subject-badge">{coordinator.subject}</div>
-                    <h3 className="coordinator-name">{coordinator.name}</h3>
-                    <a href={`mailto:${coordinator.email}`} className="coordinator-email">
-                      {coordinator.email}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </section>
+          
             
             <div className="alert alert-info mt-5 mb-4 border-0 shadow-sm rounded-4 fade-in" style={{animationDelay: "0.8s"}}>
               <div className="d-flex py-2">

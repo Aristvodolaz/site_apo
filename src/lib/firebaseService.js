@@ -194,6 +194,68 @@ export const migrateDataToFirestore = async (data) => {
 };
 
 /**
+ * Сервис для работы с предметами
+ */
+export const subjectsService = {
+  // Получение всех предметов
+  getAllSubjects: async () => {
+    try {
+      const subjectsRef = collection(db, 'subjects');
+      const snapshot = await getDocs(subjectsRef);
+      
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Ошибка при получении предметов:', error);
+      throw error;
+    }
+  },
+
+  // Получение предмета по ID
+  getSubjectById: async (id) => {
+    try {
+      const docRef = doc(db, 'subjects', id);
+      const snapshot = await getDoc(docRef);
+      
+      if (snapshot.exists()) {
+        return {
+          id: snapshot.id,
+          ...snapshot.data()
+        };
+      }
+      
+      throw new Error(`Предмет ${id} не найден`);
+    } catch (error) {
+      console.error(`Ошибка при получении предмета ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Обновление предмета
+  updateSubject: async (id, subjectData) => {
+    try {
+      const data = {
+        ...subjectData,
+        updated_at: serverTimestamp()
+      };
+      
+      const docRef = doc(db, 'subjects', id);
+      await setDoc(docRef, data, { merge: true });
+      
+      return {
+        id,
+        ...data
+      };
+    } catch (error) {
+      console.error(`Ошибка при обновлении предмета ${id}:`, error);
+      throw error;
+    }
+  }
+};
+
+/**
  * Сервис для работы с дипломами
  */
 export const diplomasService = {
@@ -377,6 +439,230 @@ export const diplomasService = {
         success: false, 
         message: `Ошибка соединения: ${error.message}` 
       };
+    }
+  }
+};
+
+/**
+ * Сервис для работы с организаторами и партнерами
+ */
+export const organizersService = {
+  // Получение всех организаторов и партнеров
+  getAllOrganizers: async () => {
+    try {
+      const organizersRef = collection(db, 'organizers');
+      const q = query(organizersRef, orderBy('order', 'asc'));
+      const snapshot = await getDocs(q);
+      
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Ошибка при получении организаторов:', error);
+      throw error;
+    }
+  },
+
+  // Получение только организаторов
+  getOrganizers: async () => {
+    try {
+      const organizersRef = collection(db, 'organizers');
+      const snapshot = await getDocs(organizersRef);
+      
+      return snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(org => org.type === 'organizer')
+        .sort((a, b) => a.order - b.order);
+    } catch (error) {
+      console.error('Ошибка при получении организаторов:', error);
+      throw error;
+    }
+  },
+
+  // Получение только партнеров
+  getPartners: async () => {
+    try {
+      const organizersRef = collection(db, 'organizers');
+      const snapshot = await getDocs(organizersRef);
+      
+      return snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(org => org.type === 'partner')
+        .sort((a, b) => a.order - b.order);
+    } catch (error) {
+      console.error('Ошибка при получении партнеров:', error);
+      throw error;
+    }
+  },
+
+  // Получение организатора по ID
+  getOrganizerById: async (id) => {
+    try {
+      const docRef = doc(db, 'organizers', id);
+      const snapshot = await getDoc(docRef);
+      
+      if (snapshot.exists()) {
+        return {
+          id: snapshot.id,
+          ...snapshot.data()
+        };
+      }
+      
+      throw new Error(`Организатор ${id} не найден`);
+    } catch (error) {
+      console.error(`Ошибка при получении организатора ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Обновление организатора
+  updateOrganizer: async (id, organizerData) => {
+    try {
+      const data = {
+        ...organizerData,
+        updated_at: serverTimestamp()
+      };
+      
+      const docRef = doc(db, 'organizers', id);
+      await setDoc(docRef, data, { merge: true });
+      
+      return {
+        id,
+        ...data
+      };
+    } catch (error) {
+      console.error(`Ошибка при обновлении организатора ${id}:`, error);
+      throw error;
+    }
+  }
+};
+
+export const winnersWorksService = {
+  // Получить все работы победителей
+  async getAllWinnersWorks() {
+    try {
+      // Имитация задержки сети
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Возвращаем моковые данные, отсортированные по году (новые сначала)
+      return mockWinnersWorks.sort((a, b) => b.year - a.year || b.created_at - a.created_at);
+    } catch (error) {
+      console.error('Error fetching winners works:', error);
+      throw error;
+    }
+  },
+
+  // Получить работы по предмету
+  async getWinnersWorksBySubject(subject) {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      const filtered = mockWinnersWorks.filter(work => 
+        work.subject.toLowerCase() === subject.toLowerCase()
+      );
+      
+      return filtered.sort((a, b) => b.year - a.year || b.created_at - a.created_at);
+    } catch (error) {
+      console.error('Error fetching winners works by subject:', error);
+      throw error;
+    }
+  },
+
+  // Поиск работ
+  async searchWinnersWorks(searchTerm) {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      const term = searchTerm.toLowerCase();
+      const filtered = mockWinnersWorks.filter(work =>
+        work.title.toLowerCase().includes(term) ||
+        work.author.toLowerCase().includes(term) ||
+        work.description.toLowerCase().includes(term)
+      );
+      
+      return filtered.sort((a, b) => b.year - a.year || b.created_at - a.created_at);
+    } catch (error) {
+      console.error('Error searching winners works:', error);
+      throw error;
+    }
+  },
+
+  // Получить работу по ID
+  async getWinnerWorkById(id) {
+    try {
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      const work = mockWinnersWorks.find(work => work.id === id);
+      if (!work) {
+        throw new Error('Work not found');
+      }
+      
+      return work;
+    } catch (error) {
+      console.error('Error fetching winner work by ID:', error);
+      throw error;
+    }
+  },
+
+  // Добавить новую работу (для админки)
+  async addWinnerWork(workData) {
+    try {
+      const newWork = {
+        id: `work${Date.now()}`,
+        ...workData,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      
+      mockWinnersWorks.push(newWork);
+      return newWork;
+    } catch (error) {
+      console.error('Error adding winner work:', error);
+      throw error;
+    }
+  },
+
+  // Обновить работу (для админки)
+  async updateWinnerWork(id, workData) {
+    try {
+      const index = mockWinnersWorks.findIndex(work => work.id === id);
+      if (index === -1) {
+        throw new Error('Work not found');
+      }
+      
+      mockWinnersWorks[index] = {
+        ...mockWinnersWorks[index],
+        ...workData,
+        updated_at: new Date()
+      };
+      
+      return mockWinnersWorks[index];
+    } catch (error) {
+      console.error('Error updating winner work:', error);
+      throw error;
+    }
+  },
+
+  // Удалить работу (для админки)
+  async deleteWinnerWork(id) {
+    try {
+      const index = mockWinnersWorks.findIndex(work => work.id === id);
+      if (index === -1) {
+        throw new Error('Work not found');
+      }
+      
+      mockWinnersWorks.splice(index, 1);
+      return true;
+    } catch (error) {
+      console.error('Error deleting winner work:', error);
+      throw error;
     }
   }
 }; 

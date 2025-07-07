@@ -74,6 +74,7 @@ logs
 .cache/
 .temp/
 .tmp/
+.cursor
 
 # Python
 __pycache__/

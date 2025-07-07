@@ -1,9 +1,30 @@
-export const subjectsData = [
+// Скрипт для инициализации данных в Firebase
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, doc, setDoc } from 'firebase/firestore';
+
+// Конфигурация Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDGUHtsKlZv1-FMdHSJyHcjWBaUyAjIUHs",
+  authDomain: "hse-service.firebaseapp.com",
+  databaseURL: "https://hse-service-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "hse-service",
+  storageBucket: "hse-service.firebasestorage.app",
+  messagingSenderId: "538884805084",
+  appId: "1:538884805084:web:8c02a41a0b543994dc3f19",
+  measurementId: "G-8HLWX6QBE4"
+};
+
+// Инициализация Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Данные предметов
+const subjectsData = [
   {
     id: 'math',
     title: 'Математика',
     shortDescription: 'Олимпиада по математике для учащихся 4-11 классов',
-    description: 'Математика — старейший профиль Арктической олимпиады, проводится с 2020 года. В отборочном этапе 2024 года приняли участие 2460 школьников, а в заключительном — 709. К участию приглашаются учащиеся 4-11 классов.',
+    description: 'Арктическая олимпиада «Полярный круг» стартовала в 2020 году как небольшое региональное состязание по математике. Сегодня это масштабная всероссийская олимпиада по четырем предметам, объединяющая участников из более чем 70 регионов России и стран СНГ — Беларуси, Молдовы, Кыргызстана и Узбекистана.',
     icon: 'calculator',
     color: 'primary',
     link: '/subjects/math',
@@ -29,7 +50,7 @@ export const subjectsData = [
       },
       {
         year: '2023',
-        qualification: '/files/math/2023/qualification.pdf',
+        qualification: 'https://disk.360.yandex.ru/d/sXBClzFG1e8eZw',
         final: '/files/math/2023/final.pdf',
         solutions: '/files/math/2023/solutions.pdf'
       }
@@ -140,3 +161,38 @@ export const subjectsData = [
     ]
   }
 ];
+
+async function initializeFirebaseData() {
+  try {
+    console.log('🚀 Начинаем инициализацию данных в Firebase...');
+    
+    // Загружаем предметы
+    console.log('📚 Загружаем предметы...');
+    for (let i = 0; i < subjectsData.length; i++) {
+      const subject = subjectsData[i];
+      const docRef = doc(db, 'subjects', i.toString());
+      
+      await setDoc(docRef, {
+        ...subject,
+        created_at: new Date(),
+        updated_at: new Date()
+      });
+      
+      console.log(`✅ Загружен предмет: ${subject.title} (ID: ${i})`);
+    }
+    
+    console.log('🎉 Все данные успешно загружены в Firebase!');
+    console.log('📋 Загруженные предметы:');
+    subjectsData.forEach((subject, index) => {
+      console.log(`  ${index}: ${subject.title}`);
+    });
+    
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Ошибка при инициализации данных:', error);
+    process.exit(1);
+  }
+}
+
+// Запускаем инициализацию
+initializeFirebaseData(); 

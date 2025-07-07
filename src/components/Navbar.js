@@ -51,13 +51,13 @@ export default function Navbar() {
         
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <Link href="/" legacyBehavior>
                 <a className={`nav-link ${isActive('/')}`}>
                   <span className="nav-link-text">Главная</span>
                 </a>
               </Link>
-            </li>
+            </li> */}
             <li className="nav-item dropdown">
               <a 
                 className={`nav-link dropdown-toggle ${router.pathname.startsWith('/about') ? 'active' : ''}`}
@@ -76,13 +76,13 @@ export default function Navbar() {
                     </a>
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link href="/about/archive" legacyBehavior>
                     <a className={`dropdown-item ${isActive('/about/archive')}`}>
                       <i className="bi bi-archive me-2"></i>Архив
                     </a>
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </li>
             <li className="nav-item dropdown">
@@ -145,6 +145,13 @@ export default function Navbar() {
               <Link href="/diplomas" legacyBehavior>
                 <a className={`nav-link ${isActive('/diplomas')}`}>
                   <span className="nav-link-text">Дипломы</span>
+                </a>
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link href="/winners" legacyBehavior>
+                <a className={`nav-link ${isActive('/winners')}`}>
+                  <span className="nav-link-text">Работы</span>
                 </a>
               </Link>
             </li>
