@@ -127,7 +127,7 @@ export default function Footer() {
               © {currentYear} Арктическая олимпиада. Все права защищены.
             </div>
             <div className="footer-links-secondary">
-              <Link href="https://drive.google.com/file/d/1GYfVoYCsmM1US4B-TbDpLYOcphbdsUpw/view?usp=drive_link" legacyBehavior>
+              <Link href="https://disk.360.yandex.ru/i/vzRF8aPTWNkbFg" legacyBehavior>
                 <a>Политика конфиденциальности</a>
               </Link>
           
