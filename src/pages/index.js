@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Layout from '../components/Layout';
 import NewsCard from '../components/NewsCard';
 import SubjectCard from '../components/SubjectCard';
+import FAQSection from '../components/FAQSection';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getNews } from '../lib/dataService';
@@ -288,6 +289,9 @@ export default function Home() {
 
       {/* Организаторы и партнеры */}
       <OrganizersAndPartners />
+
+      {/* FAQ Section */}
+      <FAQSection />
     </Layout>
   );
 } 
