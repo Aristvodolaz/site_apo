@@ -17,7 +17,7 @@ export default function FAQSection() {
   };
 
   return (
-    <section className="py-5 faq-section">
+    <section id="faq" className="py-5 faq-section">
       <div className="container">
         {/* Заголовок секции */}
         <div className="row mb-5">

@@ -155,6 +155,7 @@ export default function Navbar() {
                 </a>
               </Link>
             </li>
+        
           
             <li className="nav-item">
               <Link href="/contacts" legacyBehavior>

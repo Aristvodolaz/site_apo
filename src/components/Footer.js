@@ -21,7 +21,8 @@ export default function Footer() {
       // { title: 'Регистрация', href: '/register' },
       // { title: 'Расписание', href: '/schedule' },
       { title: 'Документы', href: '/documents' },
-      { title: 'Новости', href: '/news' }
+      { title: 'Новости', href: '/news' },
+      { title: 'FAQ', href: '/#faq' }
     ],
     social: [
       // { title: 'VK', href: '#', icon: 'chat' },

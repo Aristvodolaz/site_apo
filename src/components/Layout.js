@@ -1,6 +1,7 @@
 import Head from 'next/head';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import ScrollToTop from './ScrollToTop';
 import { useRouter } from 'next/router';
 
 export default function Layout({ children, title = 'Арктическая олимпиада' }) {
@@ -46,6 +47,7 @@ export default function Layout({ children, title = 'Арктическая ол�
       )}
       <main>{children}</main>
       <Footer />
+      <ScrollToTop />
     </>
   );
 } 
