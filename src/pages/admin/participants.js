@@ -17,6 +17,10 @@ export default function ParticipantsPage() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({
+    key: 'createdAt',
+    direction: 'desc'
+  });
   const [filters, setFilters] = useState({
     search: '',
     region: '',
@@ -139,6 +143,7 @@ export default function ParticipantsPage() {
 
         return {
           id: doc.id,
+          participantId: docData.participantId || '—',
           firstName: docData.firstName || '',
           lastName: docData.lastName || '',
           middleName: docData.middleName || '',
@@ -164,6 +169,38 @@ export default function ParticipantsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Функция сортировки
+  const sortData = (data, key, direction) => {
+    return [...data].sort((a, b) => {
+      let aValue = a[key];
+      let bValue = b[key];
+
+      // Специальная обработка для разных типов данных
+      if (key === 'createdAt') {
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+      } else if (key === 'grade') {
+        aValue = parseInt(aValue);
+        bValue = parseInt(bValue);
+      } else if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  // Функция для изменения сортировки
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc'
+    }));
   };
 
   // Фильтрация участников
@@ -203,10 +240,13 @@ export default function ParticipantsPage() {
     console.log('Текущие фильтры:', filters);
   }, [participants, filteredParticipants, filters]);
 
+  // Сортировка отфильтрованных данных
+  const sortedParticipants = sortData(filteredParticipants, sortConfig.key, sortConfig.direction);
+
   // Добавляем функции для пагинации
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredParticipants.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = sortedParticipants.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredParticipants.length / itemsPerPage);
 
   const handlePageChange = (pageNumber) => {
@@ -297,6 +337,7 @@ export default function ParticipantsPage() {
   const exportToExcel = () => {
     // Подготовка данных для экспорта (используем отфильтрованные данные)
     const exportData = filteredParticipants.map(p => ({
+      'ID участника': p.participantId || 'Не указан',
       'Фамилия': p.lastName,
       'Имя': p.firstName,
       'Отчество': p.middleName || 'Не указано',
@@ -722,18 +763,129 @@ export default function ParticipantsPage() {
                     <thead className="bg-light">
                       <tr>
                         <th className="fw-semibold">#</th>
-                        <th className="fw-semibold" style={{ width: '15%' }}>Фамилия</th>
-                        <th className="fw-semibold" style={{ width: '12%' }}>Имя</th>
-                        <th className="fw-semibold" style={{ width: '13%' }}>Отчество</th>
-                        <th className="fw-semibold" style={{ width: '15%' }}>Email</th>
-                        <th className="fw-semibold" style={{ width: '10%' }}>Телефон</th>
-                        <th className="fw-semibold" style={{ width: '15%' }}>Школа</th>
-                        <th className="fw-semibold" style={{ width: '10%' }}>Регион</th>
-                        <th className="fw-semibold" style={{ width: '10%' }}>Город</th>
-                        <th className="fw-semibold" style={{ width: '5%' }}>Класс</th>
-                        <th className="fw-semibold" style={{ width: '15%' }}>Предметы</th>
-                        <th className="fw-semibold" style={{ width: '8%' }}>Статус</th>
-                        <th className="fw-semibold" style={{ width: '10%' }}>Действия</th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '10%', cursor: 'pointer' }}
+                          onClick={() => handleSort('participantId')}
+                        >
+                          <div className="d-flex align-items-center">
+                            ID участника
+                            {sortConfig.key === 'participantId' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '12%', cursor: 'pointer' }}
+                          onClick={() => handleSort('lastName')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Фамилия
+                            {sortConfig.key === 'lastName' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '10%', cursor: 'pointer' }}
+                          onClick={() => handleSort('firstName')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Имя
+                            {sortConfig.key === 'firstName' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '12%', cursor: 'pointer' }}
+                          onClick={() => handleSort('middleName')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Отчество
+                            {sortConfig.key === 'middleName' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '12%', cursor: 'pointer' }}
+                          onClick={() => handleSort('email')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Email
+                            {sortConfig.key === 'email' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th className="fw-semibold" style={{ width: '8%' }}>Телефон</th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '12%', cursor: 'pointer' }}
+                          onClick={() => handleSort('school')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Школа
+                            {sortConfig.key === 'school' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '8%', cursor: 'pointer' }}
+                          onClick={() => handleSort('region')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Регион
+                            {sortConfig.key === 'region' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '8%', cursor: 'pointer' }}
+                          onClick={() => handleSort('city')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Город
+                            {sortConfig.key === 'city' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '5%', cursor: 'pointer' }}
+                          onClick={() => handleSort('grade')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Класс
+                            {sortConfig.key === 'grade' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th className="fw-semibold" style={{ width: '12%' }}>Предметы</th>
+                        <th 
+                          className="fw-semibold" 
+                          style={{ width: '12%', cursor: 'pointer' }}
+                          onClick={() => handleSort('status')}
+                        >
+                          <div className="d-flex align-items-center">
+                            Статус
+                            {sortConfig.key === 'status' && (
+                              <i className={`bi bi-arrow-${sortConfig.direction === 'asc' ? 'up' : 'down'} ms-1`}></i>
+                            )}
+                          </div>
+                        </th>
+                        <th className="fw-semibold" style={{ width: '8%' }}>Действия</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -756,6 +908,11 @@ export default function ParticipantsPage() {
                         currentItems.map((participant, index) => (
                           <tr key={participant.id}>
                             <td>{indexOfFirstItem + index + 1}</td>
+                            <td>
+                              <span className="badge bg-primary bg-opacity-10 text-primary px-2 py-1 fw-semibold" style={{ fontSize: '0.85rem' }}>
+                                {participant.participantId || '—'}
+                              </span>
+                            </td>
                             <td>{participant.lastName}</td>
                             <td>{participant.firstName}</td>
                             <td>{participant.middleName || '—'}</td>
@@ -784,18 +941,24 @@ export default function ParticipantsPage() {
                             </td>
                             <td>
                               <select 
-                                className={`form-select form-select-sm py-0 border-0 ${
-                                  participant.status === 'approved' ? 'text-success' :
-                                  participant.status === 'rejected' ? 'text-danger' :
-                                  'text-warning'
+                                className={`form-select form-select-sm py-1 ${
+                                  participant.status === 'approved' ? 'bg-success-subtle text-success border-success' :
+                                  participant.status === 'rejected' ? 'bg-danger-subtle text-danger border-danger' :
+                                  'bg-warning-subtle text-warning border-warning'
                                 }`}
                                 value={participant.status}
                                 onChange={(e) => updateParticipantStatus(participant.id, e.target.value)}
-                                style={{ fontSize: '0.8rem' }}
+                                style={{ fontSize: '0.85rem', fontWeight: '500' }}
                               >
-                                <option value="new" className="text-warning">Новый</option>
-                                <option value="approved" className="text-success">Подтвержден</option>
-                                <option value="rejected" className="text-danger">Отклонен</option>
+                                <option value="new" className="bg-warning-subtle text-warning">
+                                  <i className="bi bi-clock me-1"></i> Новый
+                                </option>
+                                <option value="approved" className="bg-success-subtle text-success">
+                                  <i className="bi bi-check-circle me-1"></i> Подтвержден
+                                </option>
+                                <option value="rejected" className="bg-danger-subtle text-danger">
+                                  <i className="bi bi-x-circle me-1"></i> Отклонен
+                                </option>
                               </select>
                             </td>
                             <td>

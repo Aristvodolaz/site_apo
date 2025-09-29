@@ -7,8 +7,44 @@ import {
   setDoc,
   query,
   orderBy,
+  where,
   serverTimestamp
 } from 'firebase/firestore';
+
+// Функция для генерации следующего доступного ID участника
+export const generateNextParticipantId = async () => {
+  try {
+    const currentYear = new Date().getFullYear();
+    const yearPrefix = `APO-${currentYear}-`;
+    
+    // Получаем все регистрации текущего года
+    const registrationsRef = collection(db, 'registrations');
+    const q = query(
+      registrationsRef,
+      where('participantId', '>=', yearPrefix),
+      where('participantId', '<', `APO-${currentYear + 1}-`),
+      orderBy('participantId', 'desc')
+    );
+    
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      // Если нет регистраций в этом году, начинаем с 00001
+      return `${yearPrefix}00001`;
+    }
+    
+    // Получаем последний использованный номер
+    const lastId = snapshot.docs[0].data().participantId;
+    const lastNumber = parseInt(lastId.split('-')[2]);
+    
+    // Генерируем следующий номер
+    const nextNumber = (lastNumber + 1).toString().padStart(5, '0');
+    return `${yearPrefix}${nextNumber}`;
+  } catch (error) {
+    console.error('Error generating next participant ID:', error);
+    throw error;
+  }
+};
 
 // Функция для получения данных из коллекции
 export const getCollectionData = async (collectionName) => {
@@ -112,4 +148,4 @@ export const createDocumentWithId = async (collectionName, docId, data) => {
     console.error(`Error creating document ${docId} in ${collectionName}:`, error);
     throw error;
   }
-}; 
+};

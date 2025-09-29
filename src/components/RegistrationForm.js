@@ -3,6 +3,7 @@ import { regionsData } from '../data/regionsData';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { generateNextParticipantId } from '../lib/dataService';
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState({
@@ -224,8 +225,12 @@ export default function RegistrationForm() {
         return;
       }
 
+      // Генерируем уникальный ID участника
+      const participantId = await generateNextParticipantId();
+
       // Подготавливаем данные для сохранения
       const dataToSave = {
+        participantId,
         firstName: formData.firstName,
         lastName: formData.lastName,
         middleName: formData.middleName,
@@ -250,7 +255,34 @@ export default function RegistrationForm() {
 
       // Добавляем данные в коллекцию registrations
       const registrationsRef = collection(db, 'registrations');
-      await addDoc(registrationsRef, dataToSave);
+      const docRef = await addDoc(registrationsRef, dataToSave);
+      
+      // Отправляем email с подтверждением регистрации
+      try {
+        await fetch('/api/email/send-registration-confirmation', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            userData: {
+              id: docRef.id,
+              participantId: participantId,
+              firstName: formData.firstName,
+              middleName: formData.middleName,
+              lastName: formData.lastName,
+              email: formData.email,
+              school: formData.school,
+              grade: formData.grade,
+              subjects: formData.subjects,
+            },
+          }),
+        });
+      } catch (error) {
+        console.error('Ошибка при отправке email:', error);
+        // Не показываем ошибку пользователю, так как регистрация уже успешно завершена
+      }
       
       setSubmitSuccess(true);
       
