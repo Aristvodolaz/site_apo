@@ -10,12 +10,12 @@ export default async function handler(req, res) {
 
   // Проверяем наличие всех переменных окружения в начале
   const envStatus = {
-    SMTP_USER: 'kap.moral22@gmail.com' || '[NOT SET]',
-    SMTP_PASSWORD: 'zitx tdff uids bdne' ? '[SET]' : '[NOT SET]',
-    SMTP_FROM: 'kap.moral22@gmail.com' || '[NOT SET]',
-    SMTP_HOST: 'smtp.gmail.com' || '[NOT SET]',
-    SMTP_PORT: '587' || '[NOT SET]',
-    SMTP_SECURE: 'false' || '[NOT SET]',
+    SMTP_USER: process.env.SMTP_USER || '[NOT SET]',
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD ? '[SET]' : '[NOT SET]',
+    SMTP_FROM: process.env.SMTP_FROM || '[NOT SET]',
+    SMTP_HOST: process.env.SMTP_HOST || '[NOT SET]',
+    SMTP_PORT: process.env.SMTP_PORT || '[NOT SET]',
+    SMTP_SECURE: process.env.SMTP_SECURE || '[NOT SET]',
   };
 
   console.log('Environment variables status:', envStatus);
