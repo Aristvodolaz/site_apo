@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { regionsData } from '../data/regionsData';
-import InputMask from 'react-input-mask';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,13 +10,17 @@ export default function RegistrationForm() {
     lastName: '',
     middleName: '',
     email: '',
-    phone: '',
     school: '',
     region: '',
     city: '',
+    customRegion: '',
+    customCity: '',
+    customCountry: '',
     grade: '',
     subjects: [],
   });
+  
+  const [useCustomLocation, setUseCustomLocation] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -64,9 +67,11 @@ export default function RegistrationForm() {
                formData.lastName.trim() !== '' && 
                !emailError;
       case 2:
+        const locationValid = useCustomLocation 
+          ? (formData.customRegion.trim() !== '' && formData.customCity.trim() !== '')
+          : (formData.region !== '' && formData.city !== '');
         return formData.school.trim() !== '' && 
-               formData.region !== '' && 
-               formData.city !== '' && 
+               locationValid && 
                formData.grade !== '';
       case 3:
         return formData.subjects.length > 0;
@@ -113,6 +118,29 @@ export default function RegistrationForm() {
       }
     }
 
+    // Обработка переключения режима местоположения
+    if (name === 'locationMode') {
+      if (value === 'custom') {
+        setUseCustomLocation(true);
+        // Очищаем поля выбора из списка
+        setFormData(prev => ({
+          ...prev,
+          region: '',
+          city: ''
+        }));
+      } else {
+        setUseCustomLocation(false);
+        // Очищаем поля свободного ввода
+        setFormData(prev => ({
+          ...prev,
+          customRegion: '',
+          customCity: '',
+          customCountry: ''
+        }));
+      }
+      return;
+    }
+
     if (name === 'region') {
       setFormData({
         ...formData,
@@ -148,8 +176,14 @@ export default function RegistrationForm() {
     if (!formData.lastName.trim()) return 'Введите фамилию';
     if (!formData.email.trim()) return 'Введите email';
     if (!formData.school.trim()) return 'Введите название учебного заведения';
-    if (!formData.region) return 'Выберите регион';
-    if (!formData.city) return 'Выберите город';
+    // Проверка местоположения в зависимости от режима
+    if (useCustomLocation) {
+      if (!formData.customRegion.trim()) return 'Введите регион';
+      if (!formData.customCity.trim()) return 'Введите город';
+    } else {
+      if (!formData.region) return 'Выберите регион';
+      if (!formData.city) return 'Выберите город';
+    }
     if (!formData.grade) return 'Выберите класс';
     if (formData.subjects.length === 0) return 'Выберите хотя бы один предмет';
 
@@ -157,11 +191,6 @@ export default function RegistrationForm() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) return 'Введите корректный email';
 
-    // Валидация телефона (если указан)
-    if (formData.phone) {
-      const phoneRegex = /^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/;
-      if (!phoneRegex.test(formData.phone)) return 'Введите корректный номер телефона';
-    }
 
     return null;
   };
@@ -195,15 +224,33 @@ export default function RegistrationForm() {
         return;
       }
 
-      // Добавляем данные в коллекцию registrations
-      const registrationsRef = collection(db, 'registrations');
-      await addDoc(registrationsRef, {
-        ...formData,
+      // Подготавливаем данные для сохранения
+      const dataToSave = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        middleName: formData.middleName,
         email: formData.email.toLowerCase(), // Сохраняем email в нижнем регистре
+        school: formData.school,
+        grade: formData.grade,
+        subjects: formData.subjects,
+        useCustomLocation: useCustomLocation,
+        // Сохраняем данные местоположения в зависимости от режима
+        ...(useCustomLocation ? {
+          region: formData.customRegion,
+          city: formData.customCity,
+          country: formData.customCountry
+        } : {
+          region: formData.region,
+          city: formData.city
+        }),
         createdAt: serverTimestamp(),
         status: 'new',
         year: new Date().getFullYear()
-      });
+      };
+
+      // Добавляем данные в коллекцию registrations
+      const registrationsRef = collection(db, 'registrations');
+      await addDoc(registrationsRef, dataToSave);
       
       setSubmitSuccess(true);
       
@@ -213,13 +260,16 @@ export default function RegistrationForm() {
         lastName: '',
         middleName: '',
         email: '',
-        phone: '',
         school: '',
         region: '',
         city: '',
+        customRegion: '',
+        customCity: '',
+        customCountry: '',
         grade: '',
         subjects: [],
       });
+      setUseCustomLocation(false);
     } catch (error) {
       console.error('Ошибка при сохранении данных:', error);
       setSubmitError('Произошла ошибка при отправке формы. Пожалуйста, попробуйте снова.');
@@ -281,20 +331,22 @@ export default function RegistrationForm() {
           <form onSubmit={handleSubmit} className="needs-validation" noValidate>
             {/* Прогресс заполнения формы */}
             <div className="position-relative mb-5">
-              <div className="progress" style={{ height: '3px' }}>
-                <motion.div
-                  className="progress-bar bg-primary"
-                  animate={{ width: `${formProgress}%` }}
-                  transition={{ duration: 0.3 }}
-                />
+              <div className="position-absolute w-100" style={{ top: '16px' }}>
+                <div className="progress" style={{ height: '3px' }}>
+                  <motion.div
+                    className="progress-bar bg-primary"
+                    animate={{ width: `${formProgress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
               </div>
-              <div className="position-absolute w-100 d-flex justify-content-between" style={{ top: '-10px' }}>
+              <div className="position-relative w-100 d-flex justify-content-between">
                 {[1, 2, 3].map((step) => (
                   <motion.button
                     key={step}
                     type="button"
-                    className={`btn btn-${currentStep >= step ? 'primary' : 'light'} rounded-circle p-2`}
-                    style={{ width: '35px', height: '35px' }}
+                    className={`btn btn-${currentStep >= step ? 'primary' : 'light'} rounded-circle d-flex align-items-center justify-content-center p-0`}
+                    style={{ width: '35px', height: '35px', fontSize: '1rem' }}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setCurrentStep(step)}
@@ -411,30 +463,6 @@ export default function RegistrationForm() {
                         </div>
                       </div>
 
-                      <div className="col-md-6">
-                        <label htmlFor="phone" className="form-label">Телефон</label>
-                        <div className="input-group input-group-lg">
-                          <span className="input-group-text bg-light">
-                            <i className="bi bi-telephone"></i>
-                          </span>
-                          <InputMask
-                            mask="+7 (999) 999-99-99"
-                            maskChar="_"
-                            className="form-control rounded-end"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            placeholder="+7 (___) ___-__-__"
-                          >
-                            {(inputProps) => <input {...inputProps} type="tel" />}
-                          </InputMask>
-                        </div>
-                        <div className="form-text">
-                          <i className="bi bi-info-circle me-1"></i>
-                          Формат: +7 (999) 999-99-99
-                        </div>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -463,8 +491,45 @@ export default function RegistrationForm() {
                         />
                       </div>
 
-                      <div className="col-md-4">
-                        <label htmlFor="region" className="form-label">
+                      {/* Переключатель режима ввода местоположения */}
+                      <div className="col-12">
+                        <div className="d-flex align-items-center gap-3 mb-3">
+                          <span className="fw-medium">Режим ввода местоположения:</span>
+                          <div className="btn-group" role="group">
+                            <input
+                              type="radio"
+                              className="btn-check"
+                              name="locationMode"
+                              id="locationModeList"
+                              checked={!useCustomLocation}
+                              onChange={() => setUseCustomLocation(false)}
+                            />
+                            <label className="btn btn-outline-primary" htmlFor="locationModeList">
+                              <i className="bi bi-list-ul me-1"></i>
+                              Из списка
+                            </label>
+
+                            <input
+                              type="radio"
+                              className="btn-check"
+                              name="locationMode"
+                              id="locationModeCustom"
+                              checked={useCustomLocation}
+                              onChange={() => setUseCustomLocation(true)}
+                            />
+                            <label className="btn btn-outline-primary" htmlFor="locationModeCustom">
+                              <i className="bi bi-pencil-square me-1"></i>
+                              Свободный ввод
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Поля для выбора из списка */}
+                      {!useCustomLocation && (
+                        <>
+                          <div className="col-md-4">
+                            <label htmlFor="region" className="form-label">
                           Регион <span className="text-danger">*</span>
                         </label>
                         <select
@@ -501,6 +566,60 @@ export default function RegistrationForm() {
                           ))}
                         </select>
                       </div>
+                        </>
+                      )}
+
+                      {/* Поля для свободного ввода */}
+                      {useCustomLocation && (
+                        <>
+                          <div className="col-md-4">
+                            <label htmlFor="customCountry" className="form-label">
+                              Страна
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control form-control-lg rounded-3"
+                              id="customCountry"
+                              name="customCountry"
+                              value={formData.customCountry}
+                              onChange={handleChange}
+                              placeholder="Например: Россия"
+                            />
+                          </div>
+
+                          <div className="col-md-4">
+                            <label htmlFor="customRegion" className="form-label">
+                              Регион <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control form-control-lg rounded-3"
+                              id="customRegion"
+                              name="customRegion"
+                              value={formData.customRegion}
+                              onChange={handleChange}
+                              required
+                              placeholder="Например: Московская область"
+                            />
+                          </div>
+
+                          <div className="col-md-4">
+                            <label htmlFor="customCity" className="form-label">
+                              Город <span className="text-danger">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              className="form-control form-control-lg rounded-3"
+                              id="customCity"
+                              name="customCity"
+                              value={formData.customCity}
+                              onChange={handleChange}
+                              required
+                              placeholder="Например: Москва"
+                            />
+                          </div>
+                        </>
+                      )}
 
                       <div className="col-md-4">
                         <label htmlFor="grade" className="form-label">

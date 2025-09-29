@@ -107,12 +107,12 @@ export default function Home() {
                   проводимая при поддержке Департамента образования ЯНАО.
                 </p>
                 <div className="d-flex flex-wrap gap-3 hero-buttons">
-                  <Link href="/register" legacyBehavior>
+                  {/* <Link href="/register" legacyBehavior>
                     <a className="btn btn-light btn-lg hero-btn-primary">
                       <span>Зарегистрироваться</span>
                       <i className="bi bi-arrow-right-circle ms-2"></i>
-                    </a>
-                  </Link>
+                    </a> */}
+                  {/* </Link> */}
                   <Link href="/about/history" legacyBehavior>
                     <a className="btn btn-outline-light btn-lg hero-btn-secondary">
                       <span>Узнать больше</span>
