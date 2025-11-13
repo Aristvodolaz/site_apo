@@ -5,19 +5,21 @@ const createTransporter = () => {
   console.log('=== Creating Email Transporter ===');
   
   // Используем сервис Gmail напрямую
-  const transportConfig = {
-    service: 'gmail',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASSWORD,
-    },
-    debug: true,
-    logger: true,
-    // Увеличиваем таймауты
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000
-  };
+const transportConfig = {
+  host: process.env.SMTP_HOST,                // smtp.yandex.ru
+  port: Number(process.env.SMTP_PORT),        // 465
+  secure: process.env.SMTP_SECURE === "true", // true
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+  debug: true,
+  logger: true,
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
+};
+
 
   console.log('Transport configuration:', {
     ...transportConfig,
