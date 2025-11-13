@@ -74,6 +74,7 @@ const emailService = {
       const mailOptions = {
         from: process.env.SMTP_FROM,
         to,
+        bcc: process.env.SMTP_FROM, 
         subject: '❄️ Успешная регистрация',
         html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(180deg, #e6f2ff, #ffffff); border-radius: 12px; overflow: hidden; box-shadow: 0 6px 16px rgba(0,0,0,0.1);">
