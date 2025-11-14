@@ -360,8 +360,10 @@ export default function MathSubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Отборочный этап</div>
                       <div className="timeline-date">
-                        {mathData.schedule?.qualification?.start} - {mathData.schedule?.qualification?.end}
-                      </div>
+                          {mathData.schedule?.qualification?.start}
+                          <br />
+                          {mathData.schedule?.qualification?.end}           
+             </div>
                     </div>
                   </li>
                   <li className="sidebar-timeline-item">
@@ -369,7 +371,7 @@ export default function MathSubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Заключительный этап</div>
                       <div className="timeline-date">
-                        {mathData.schedule?.final?.start} - {mathData.schedule?.final?.end}
+                        {mathData.schedule?.final?.start}
                       </div>
                     </div>
                   </li>

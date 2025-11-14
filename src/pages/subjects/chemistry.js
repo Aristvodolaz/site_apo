@@ -351,7 +351,7 @@ export default function ChemistrySubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Отборочный этап</div>
                       <div className="timeline-date">
-                        {chemistryData.schedule?.qualification?.start} - {chemistryData.schedule?.qualification?.end}
+                        {chemistryData.schedule?.qualification?.start}
                       </div>
                     </div>
                   </li>
@@ -360,7 +360,7 @@ export default function ChemistrySubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Заключительный этап</div>
                       <div className="timeline-date">
-                        {chemistryData.schedule?.final?.start} - {chemistryData.schedule?.final?.end}
+                        {chemistryData.schedule?.final?.start} 
                       </div>
                     </div>
                   </li>

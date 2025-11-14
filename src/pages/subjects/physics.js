@@ -351,7 +351,7 @@ export default function PhysicsSubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Отборочный этап</div>
                       <div className="timeline-date">
-                        {physicsData.schedule?.qualification?.start} - {physicsData.schedule?.qualification?.end}
+                        {physicsData.schedule?.qualification?.start} 
                       </div>
                     </div>
                   </li>
@@ -360,7 +360,7 @@ export default function PhysicsSubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Заключительный этап</div>
                       <div className="timeline-date">
-                        {physicsData.schedule?.final?.start} - {physicsData.schedule?.final?.end}
+                        {physicsData.schedule?.final?.start}
                       </div>
                     </div>
                   </li>

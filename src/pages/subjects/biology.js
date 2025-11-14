@@ -350,7 +350,7 @@ export default function BiologySubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Отборочный этап</div>
                       <div className="timeline-date">
-                        {biologyData.schedule?.qualification?.start} - {biologyData.schedule?.qualification?.end}
+                        {biologyData.schedule?.qualification?.start}
                       </div>
                     </div>
                   </li>
@@ -359,7 +359,7 @@ export default function BiologySubject() {
                     <div className="timeline-content">
                       <div className="timeline-title">Заключительный этап</div>
                       <div className="timeline-date">
-                        {biologyData.schedule?.final?.start} - {biologyData.schedule?.final?.end}
+                        {biologyData.schedule?.final?.start}
                       </div>
                     </div>
                   </li>
