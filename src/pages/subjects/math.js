@@ -352,7 +352,7 @@ export default function MathSubject() {
                     <div className="timeline-badge"></div>
                     <div className="timeline-content">
                       <div className="timeline-title">Регистрация открыта до</div>
-                      <div className="timeline-date">31.10.2024</div>
+                      <div className="timeline-date">18.01.2026</div>
                     </div>
                   </li>
                   <li className="sidebar-timeline-item">
