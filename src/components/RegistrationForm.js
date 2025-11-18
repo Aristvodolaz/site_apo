@@ -28,6 +28,7 @@ export default function RegistrationForm() {
   const [submitError, setSubmitError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [emailCheckTimeout, setEmailCheckTimeout] = useState(null);
+  const [showEmailRequired, setShowEmailRequired] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isHovered, setIsHovered] = useState(null);
@@ -66,6 +67,7 @@ export default function RegistrationForm() {
       case 1:
         return formData.firstName.trim() !== '' && 
                formData.lastName.trim() !== '' && 
+               formData.email.trim() !== '' &&
                !emailError;
       case 2:
         const locationValid = useCustomLocation 
@@ -83,9 +85,17 @@ export default function RegistrationForm() {
 
   // Обработчик перехода между шагами
   const handleStepChange = (direction) => {
-    if (direction === 'next' && isStepValid(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 3));
+    if (direction === 'next') {
+      if (currentStep === 1 && formData.email.trim() === '') {
+        setShowEmailRequired(true);
+        return;
+      }
+      if (isStepValid(currentStep)) {
+        setShowEmailRequired(false);
+        setCurrentStep(prev => Math.min(prev + 1, 3));
+      }
     } else if (direction === 'prev') {
+      setShowEmailRequired(false);
       setCurrentStep(prev => Math.max(prev - 1, 1));
     }
   };
@@ -95,6 +105,7 @@ export default function RegistrationForm() {
     
     if (name === 'email') {
       setEmailError(null);
+      setShowEmailRequired(false);
       // Отменяем предыдущий таймаут, если он существует
       if (emailCheckTimeout) {
         clearTimeout(emailCheckTimeout);
@@ -475,7 +486,7 @@ export default function RegistrationForm() {
                           </span>
                           <input
                             type="email"
-                            className={`form-control rounded-end ${emailError ? 'is-invalid' : ''}`}
+                            className={`form-control rounded-end ${emailError || showEmailRequired ? 'is-invalid' : ''}`}
                             id="email"
                             name="email"
                             value={formData.email}
@@ -488,11 +499,19 @@ export default function RegistrationForm() {
                               {emailError}
                             </div>
                           )}
+                          {showEmailRequired && !emailError && (
+                            <div className="invalid-feedback">
+                              <i className="bi bi-exclamation-circle me-1"></i>
+                              Введите электронную почту
+                            </div>
+                          )}
                         </div>
-                        <div className="form-text">
-                          <i className="bi bi-info-circle me-1"></i>
-                          На этот адрес будут отправлены дальнейшие инструкции
-                        </div>
+                        {!showEmailRequired && !emailError && (
+                          <div className="form-text">
+                            <i className="bi bi-info-circle me-1"></i>
+                            На этот адрес будут отправлены дальнейшие инструкции
+                          </div>
+                        )}
                       </div>
 
                     </div>
@@ -525,34 +544,40 @@ export default function RegistrationForm() {
 
                       {/* Переключатель режима ввода местоположения */}
                       <div className="col-12">
-                        <div className="d-flex align-items-center gap-3 mb-3">
-                          <span className="fw-medium">Режим ввода местоположения:</span>
-                          <div className="btn-group" role="group">
-                            <input
-                              type="radio"
-                              className="btn-check"
-                              name="locationMode"
-                              id="locationModeList"
-                              checked={!useCustomLocation}
-                              onChange={() => setUseCustomLocation(false)}
-                            />
-                            <label className="btn btn-outline-primary" htmlFor="locationModeList">
-                              <i className="bi bi-list-ul me-1"></i>
-                              Из списка
-                            </label>
+                        <div className="d-flex flex-column gap-2 mb-3">
+                          <div className="d-flex align-items-center gap-3">
+                            <span className="fw-medium">Режим ввода местоположения:</span>
+                            <div className="btn-group" role="group">
+                              <input
+                                type="radio"
+                                className="btn-check"
+                                name="locationMode"
+                                id="locationModeList"
+                                checked={!useCustomLocation}
+                                onChange={() => setUseCustomLocation(false)}
+                              />
+                              <label className="btn btn-outline-primary" htmlFor="locationModeList">
+                                <i className="bi bi-list-ul me-1"></i>
+                                Из списка
+                              </label>
 
-                            <input
-                              type="radio"
-                              className="btn-check"
-                              name="locationMode"
-                              id="locationModeCustom"
-                              checked={useCustomLocation}
-                              onChange={() => setUseCustomLocation(true)}
-                            />
-                            <label className="btn btn-outline-primary" htmlFor="locationModeCustom">
-                              <i className="bi bi-pencil-square me-1"></i>
-                              Свободный ввод
-                            </label>
+                              <input
+                                type="radio"
+                                className="btn-check"
+                                name="locationMode"
+                                id="locationModeCustom"
+                                checked={useCustomLocation}
+                                onChange={() => setUseCustomLocation(true)}
+                              />
+                              <label className="btn btn-outline-primary" htmlFor="locationModeCustom">
+                                <i className="bi bi-pencil-square me-1"></i>
+                                Свободный ввод
+                              </label>
+                            </div>
+                          </div>
+                          <div className="alert alert-info py-2 px-3 mb-0 d-flex align-items-center" style={{ fontSize: '0.9rem' }}>
+                            <i className="bi bi-info-circle me-2"></i>
+                            <span>Если вашего города нет в списке, воспользуйтесь свободным вводом</span>
                           </div>
                         </div>
                       </div>
