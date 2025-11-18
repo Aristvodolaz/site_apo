@@ -192,7 +192,7 @@ export default function ChemistrySubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {chemistryData.schedule?.qualification?.start} - {chemistryData.schedule?.qualification?.end}
+                            {chemistryData.schedule?.qualification?.start}
                           </div>
                         </div>
                       </div>
@@ -235,7 +235,7 @@ export default function ChemistrySubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {chemistryData.schedule?.final?.start} - {chemistryData.schedule?.final?.end}
+                            {chemistryData.schedule?.final?.start}
                           </div>
                         </div>
                       </div>

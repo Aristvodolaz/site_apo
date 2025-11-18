@@ -192,7 +192,7 @@ export default function PhysicsSubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {physicsData.schedule?.qualification?.start} - {physicsData.schedule?.qualification?.end}
+                            {physicsData.schedule?.qualification?.start}
                           </div>
                         </div>
                       </div>
@@ -235,7 +235,7 @@ export default function PhysicsSubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {physicsData.schedule?.final?.start} - {physicsData.schedule?.final?.end}
+                            {physicsData.schedule?.final?.start} 
                           </div>
                         </div>
                       </div>

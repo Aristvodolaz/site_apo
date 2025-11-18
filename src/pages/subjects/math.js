@@ -244,7 +244,7 @@ export default function MathSubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {mathData.schedule?.final?.start} - {mathData.schedule?.final?.end}
+                            {mathData.schedule?.final?.start}
                           </div>
                         </div>
                       </div>

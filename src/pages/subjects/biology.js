@@ -191,7 +191,7 @@ export default function BiologySubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {biologyData.schedule?.qualification?.start} - {biologyData.schedule?.qualification?.end}
+                            {biologyData.schedule?.qualification?.start}
                           </div>
                         </div>
                       </div>
@@ -234,7 +234,7 @@ export default function BiologySubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {biologyData.schedule?.final?.start} - {biologyData.schedule?.final?.end}
+                            {biologyData.schedule?.final?.start}
                           </div>
                         </div>
                       </div>
