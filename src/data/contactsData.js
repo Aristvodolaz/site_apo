@@ -21,7 +21,7 @@ export const contactsData = {
     }
   ],
   olympiadContacts: {
-    email: 'regions@apo-team.ru',
+    email: 'info@arctolymp.ru',
     telegram: '@arctolymp',
     vk: 'vk.com/arctolymp',
     registrationHelp: '+7 (800) 100-XX-XX (горячая линия по вопросам регистрации)'

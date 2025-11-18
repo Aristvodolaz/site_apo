@@ -299,8 +299,8 @@ export default function Documents() {
                           <p className="mb-0">
                             Все официальные документы Арктической олимпиады «Полярный круг» представлены в формате PDF. 
                             Если у вас возникли вопросы по документам, пожалуйста, свяжитесь с нами по адресу{' '}
-                            <a href="mailto:docs@arctic-olymp.ru" className="alert-link">
-                              docs@arctic-olymp.ru
+                            <a href="mailto:info@arctolymp.ru" className="alert-link">
+                              info@arctolymp.ru
                             </a>
                           </p>
                         </div>

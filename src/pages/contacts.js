@@ -162,8 +162,8 @@ export default function Contacts() {
                   <p className="mb-0">
                     Если у вас остались вопросы по организации Арктической олимпиады, 
                     пожалуйста, напишите нам на почту{' '}
-                    <a href={`mailto:${olympiadContacts.email || 'info@arctic-olymp.ru'}`} className="alert-link">
-                      {olympiadContacts.email || 'info@arctic-olymp.ru'}
+                    <a href={`mailto:${olympiadContacts.email || 'info@arctolymp.ru'}`} className="alert-link">
+                      {olympiadContacts.email || 'info@arctolymp.ru'}
                     </a>
                   </p>
                 </div>

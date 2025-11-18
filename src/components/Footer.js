@@ -112,7 +112,7 @@ export default function Footer() {
               <ul className="footer-contacts">
                 <li>
                   <i className="bi bi-envelope"></i>
-                  <a href="mailto:info@arctic-olymp.ru">info@arctic-olymp.ru</a>
+                  <a href="mailto:info@arctolymp.ru">info@arctolymp.ru</a>
                 </li>
               </ul>
             </div>
