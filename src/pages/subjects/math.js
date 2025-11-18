@@ -201,7 +201,7 @@ export default function MathSubject() {
                         <div>
                           <div className="phase-label">Даты проведения</div>
                           <div className="phase-value">
-                            {mathData.schedule?.qualification?.start} - {mathData.schedule?.qualification?.end}
+                            <span>{mathData.schedule?.qualification?.start}</span> <br /><span>{mathData.schedule?.qualification?.end}</span>
                           </div>
                         </div>
                       </div>
