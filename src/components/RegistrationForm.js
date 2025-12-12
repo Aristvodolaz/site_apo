@@ -420,7 +420,7 @@ export default function RegistrationForm() {
                     <div className="alert alert-warning d-flex align-items-start mb-4" role="alert">
                       <i className="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
                       <div>
-                        <strong>Внимание!</strong> Укажите данные именно того ребенка, который будет участвовать в олимпиаде (ФИО и email участника).
+                        <strong>Внимание!</strong> Укажите данные ребенка, который будет участвовать в олимпиаде (ФИО и email участника).
                       </div>
                     </div>
 

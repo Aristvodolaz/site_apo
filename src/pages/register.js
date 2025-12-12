@@ -22,7 +22,7 @@ export default function Register() {
                 <div className="d-flex flex-column gap-4">
                   <div className="alert alert-warning mb-0" role="alert">
                     <i className="bi bi-person-fill me-2"></i>
-                    <strong>Важно:</strong> Укажите данные именно того ребенка, который будет участвовать в олимпиаде.
+                    <strong>Важно:</strong> Укажите данные ребенка, который будет участвовать в олимпиаде.
                   </div>
                   <div className="alert alert-info mb-0" role="alert">
                     <i className="bi bi-bookmark-check me-2"></i>
