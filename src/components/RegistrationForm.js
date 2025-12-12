@@ -416,6 +416,14 @@ export default function RegistrationForm() {
                       <p className="text-muted">Шаг 1 из 3 - Основная информация</p>
                     </div>
 
+                    {/* Пометка о данных ребенка */}
+                    <div className="alert alert-warning d-flex align-items-start mb-4" role="alert">
+                      <i className="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                      <div>
+                        <strong>Внимание!</strong> Укажите данные именно того ребенка, который будет участвовать в олимпиаде (ФИО и email участника).
+                      </div>
+                    </div>
+
                     <div className="row g-4">
                       <div className="col-12 mb-2">
                         <h5 className="fw-bold mb-3">
@@ -705,6 +713,14 @@ export default function RegistrationForm() {
                     <div className="text-center mb-5">
                       <h2 className="card-title fw-bold">Выбор предметов</h2>
                       <p className="text-muted">Шаг 3 из 3 - Завершение регистрации</p>
+                    </div>
+
+                    {/* Пометка о выборе предметов */}
+                    <div className="alert alert-info d-flex align-items-start mb-4" role="alert">
+                      <i className="bi bi-info-circle-fill me-2 mt-1"></i>
+                      <div>
+                        <strong>Подсказка:</strong> Выберите сразу все предметы, в которых хотите участвовать. Повторно регистрироваться на каждый предмет не нужно — одной регистрации достаточно для участия во всех выбранных дисциплинах.
+                      </div>
                     </div>
 
                     <div className="row g-4">

@@ -20,6 +20,14 @@ export default function Register() {
                   Важная информация
                 </h4>
                 <div className="d-flex flex-column gap-4">
+                  <div className="alert alert-warning mb-0" role="alert">
+                    <i className="bi bi-person-fill me-2"></i>
+                    <strong>Важно:</strong> Укажите данные именно того ребенка, который будет участвовать в олимпиаде.
+                  </div>
+                  <div className="alert alert-info mb-0" role="alert">
+                    <i className="bi bi-bookmark-check me-2"></i>
+                    <strong>О предметах:</strong> Выберите сразу все предметы, в которых хотите участвовать. Повторная регистрация на каждый предмет не требуется.
+                  </div>
                   <div>
                     <h5 className="h6 mb-2">Сроки регистрации</h5>
                     <p className="mb-0">
