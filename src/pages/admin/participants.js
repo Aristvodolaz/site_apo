@@ -207,6 +207,7 @@ export default function ParticipantsPage() {
   const filteredParticipants = participants.filter(participant => {
     const searchLower = filters.search.toLowerCase();
     const matchesSearch = 
+      participant.participantId?.toLowerCase().includes(searchLower) ||
       participant.firstName?.toLowerCase().includes(searchLower) ||
       participant.lastName?.toLowerCase().includes(searchLower) ||
       participant.middleName?.toLowerCase().includes(searchLower) ||
@@ -494,20 +495,22 @@ export default function ParticipantsPage() {
       
       // Закрываем модальное окно
       const modalElement = document.getElementById('editParticipantModal');
-      if (modalElement) {
-        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+      if (modalElement && bootstrap) {
+        // Используем getOrCreateInstance для надёжного получения экземпляра
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
         if (modalInstance) {
           modalInstance.hide();
         }
-        // Удаляем backdrop вручную
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-          backdrop.remove();
-        }
-        // Убираем класс modal-open с body
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
+        
+        // Даём время на завершение анимации закрытия, затем очищаем
+        setTimeout(() => {
+          // Удаляем все backdrop элементы
+          document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+          // Убираем класс modal-open с body
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        }, 300);
       }
       
       // Очищаем состояние формы
@@ -662,7 +665,7 @@ export default function ParticipantsPage() {
                       <input
                         type="text"
                         className="form-control border-start-0 ps-0"
-                        placeholder="Поиск по имени, фамилии, школе или email..."
+                        placeholder="Поиск по ID, имени, фамилии, школе или email..."
                         value={filters.search}
                         onChange={(e) => handleFilterChange('search', e.target.value)}
                       />

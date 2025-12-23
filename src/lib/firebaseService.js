@@ -544,6 +544,65 @@ export const organizersService = {
   }
 };
 
+/**
+ * Сервис для работы с документами
+ */
+export const documentsService = {
+  // Получение всех документов
+  getAllDocuments: async () => {
+    try {
+      const documentsRef = collection(db, 'documents');
+      const snapshot = await getDocs(documentsRef);
+      
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Ошибка при получении документов:', error);
+      throw error;
+    }
+  },
+
+  // Получение документа по ID
+  getDocumentById: async (id) => {
+    try {
+      const docRef = doc(db, 'documents', id);
+      const snapshot = await getDoc(docRef);
+      
+      if (snapshot.exists()) {
+        return {
+          id: snapshot.id,
+          ...snapshot.data()
+        };
+      }
+      
+      throw new Error(`Документ ${id} не найден`);
+    } catch (error) {
+      console.error(`Ошибка при получении документа ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Получение документов по категории
+  getDocumentsByCategory: async (category) => {
+    try {
+      const documentsRef = collection(db, 'documents');
+      const snapshot = await getDocs(documentsRef);
+      
+      return snapshot.docs
+        .map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }))
+        .filter(document => document.category === category);
+    } catch (error) {
+      console.error(`Ошибка при получении документов категории ${category}:`, error);
+      throw error;
+    }
+  }
+};
+
 export const winnersWorksService = {
   // Получить все работы победителей
   async getAllWinnersWorks() {

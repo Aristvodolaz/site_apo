@@ -1,11 +1,12 @@
 import Layout from '../../components/Layout';
 import PageHeader from '../../components/PageHeader';
 import Link from 'next/link';
-import { subjectsService } from '../../lib/firebaseService';
+import { subjectsService, documentsService } from '../../lib/firebaseService';
 import { useEffect, useState } from 'react';
 
 export default function BiologySubject() {
   const [biologyData, setBiologyData] = useState(null);
+  const [regulationDoc, setRegulationDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -23,8 +24,13 @@ export default function BiologySubject() {
         const data = await subjectsService.getSubjectById('1'); // Второй документ в коллекции subjects
         console.log('Biology data loaded from Firebase:', data);
         
+        // Получаем документ регламента для биологии (doc7)
+        const docData = await documentsService.getDocumentById('doc7');
+        console.log('Biology regulation document loaded from Firebase:', docData);
+        
         if (data) {
           setBiologyData(data);
+          setRegulationDoc(docData);
         } else {
           setError('Данные по биологии не найдены.');
         }
@@ -372,13 +378,15 @@ export default function BiologySubject() {
                   Документы
                 </h3>
                 <ul className="sidebar-links">
-                  <li>
-                    <a href="/documents/biology_reglament_2025.pdf" className="sidebar-link" target="_blank" rel="noopener noreferrer">
-                      <i className="bi bi-file-earmark-pdf"></i>
-                      <span>Регламент проведения</span>
-                      <i className="bi bi-chevron-right"></i>
-                    </a>
-                  </li>
+                  {regulationDoc && (
+                    <li>
+                      <a href={regulationDoc.url} className="sidebar-link" target="_blank" rel="noopener noreferrer">
+                        <i className="bi bi-file-earmark-pdf"></i>
+                        <span>{regulationDoc.title}</span>
+                        <i className="bi bi-chevron-right"></i>
+                      </a>
+                    </li>
+                  )}
                   <li>
                     <a href="/documents/appeal_arctic_olympiad_2025.pdf" className="sidebar-link" target="_blank" rel="noopener noreferrer">
                       <i className="bi bi-file-earmark-pdf"></i>

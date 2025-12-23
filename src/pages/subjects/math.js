@@ -1,12 +1,13 @@
 import Layout from '../../components/Layout';
 import PageHeader from '../../components/PageHeader';
 import Link from 'next/link';
-import { subjectsService } from '../../lib/firebaseService';
+import { subjectsService, documentsService } from '../../lib/firebaseService';
 import { db } from '../../lib/firebase';
 import { useEffect, useState } from 'react';
 
 export default function MathSubject() {
   const [mathData, setMathData] = useState(null);
+  const [regulationDoc, setRegulationDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -31,8 +32,13 @@ export default function MathSubject() {
         const data = await subjectsService.getSubjectById('0'); // Математика имеет ID '0' в Firebase
         console.log('Math data loaded from Firebase:', data);
         
+        // Получаем документ регламента для математики (doc6)
+        const docData = await documentsService.getDocumentById('doc6');
+        console.log('Math regulation document loaded from Firebase:', docData);
+        
         if (data) {
           setMathData(data);
+          setRegulationDoc(docData);
         } else {
           setError('Данные по математике не найдены.');
         }
@@ -384,13 +390,15 @@ export default function MathSubject() {
                   Документы
                 </h3>
                 <ul className="sidebar-links">
-                  <li>
-                    <a href="/documents/math_reglament_2025.pdf" className="sidebar-link" target="_blank" rel="noopener noreferrer">
-                      <i className="bi bi-file-earmark-pdf"></i>
-                      <span>Регламент проведения</span>
-                      <i className="bi bi-chevron-right"></i>
-                    </a>
-                  </li>
+                  {regulationDoc && (
+                    <li>
+                      <a href={regulationDoc.url} className="sidebar-link" target="_blank" rel="noopener noreferrer">
+                        <i className="bi bi-file-earmark-pdf"></i>
+                        <span>{regulationDoc.title}</span>
+                        <i className="bi bi-chevron-right"></i>
+                      </a>
+                    </li>
+                  )}
                   <li>
                     <a href="/documents/appeal_arctic_olympiad_2025.pdf" className="sidebar-link" target="_blank" rel="noopener noreferrer">
                       <i className="bi bi-file-earmark-pdf"></i>
