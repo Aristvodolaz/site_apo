@@ -107,9 +107,9 @@ export default function Home() {
                   проводимая при поддержке Департамента образования ЯНАО.
                 </p>
                 <div className="d-flex flex-wrap gap-3 hero-buttons">
-                  <Link href="/register" legacyBehavior>
+                  <Link href="https://disk.360.yandex.ru/i/sechzxWalxH7hA" legacyBehavior>
                     <a className="btn btn-light btn-lg hero-btn-primary">
-                      <span>Зарегистрироваться</span>
+                      <span>Прохождение отборочного этапа</span>
                       <i className="bi bi-arrow-right-circle ms-2"></i>
                     </a>
                   </Link>

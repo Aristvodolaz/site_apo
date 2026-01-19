@@ -82,12 +82,12 @@ export default function ChemistrySubject() {
               <h1 className="text-white display-4 fw-bold mb-3">{chemistryData.title}</h1>
               <p className="text-white opacity-90 lead mb-4">{chemistryData.shortDescription}</p>
               <div className="d-flex flex-wrap gap-3">
-                <Link href="/register" legacyBehavior>
+                {/* <Link href="/register" legacyBehavior>
                   <a className="hero-btn-primary">
                     <span>Регистрация</span>
                     <i className="bi bi-arrow-right-circle ms-2"></i>
                   </a>
-                </Link>
+                </Link> */}
               </div>
             </div>
             <div className="col-lg-4 d-none d-lg-block">
@@ -269,12 +269,12 @@ export default function ChemistrySubject() {
               </div>
               
               <div className="text-center mt-4">
-                <Link href="/register" legacyBehavior>
+                {/* <Link href="/register" legacyBehavior>
                   <a className="btn-register">
                     <span>Зарегистрироваться на олимпиаду</span>
                     <i className="bi bi-arrow-right-circle ms-2"></i>
                   </a>
-                </Link>
+                </Link> */}
               </div>
             </section>
             
@@ -406,7 +406,7 @@ export default function ChemistrySubject() {
               </div>
                 
            
-              <div className="d-grid gap-2 mt-4">
+              {/* <div className="d-grid gap-2 mt-4">
                 <Link href="/register" legacyBehavior>
                   <a className="btn-register d-flex align-items-center justify-content-center">
                     <i className="bi bi-pencil-square me-2"></i>
@@ -414,7 +414,7 @@ export default function ChemistrySubject() {
                   </a>
                 </Link>
                
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
