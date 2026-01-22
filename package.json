@@ -6,7 +6,12 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "assign-ids": "node src/scripts/assignParticipantIds.cjs"
+        "assign-ids": "node src/scripts/assignParticipantIds.cjs",
+        "send-test-email": "node src/scripts/sendTestEmail.cjs",
+        "send-mass-email": "node src/scripts/sendMassEmail.cjs",
+        "retry-failed-emails": "node src/scripts/retryFailedEmails.cjs",
+        "retry-from": "node src/scripts/retryFailedEmails.cjs",
+        "send-by-subject": "node src/scripts/sendEmailBySubject.cjs"
     },
     "dependencies": {
         "bootstrap": "^5.3.6",

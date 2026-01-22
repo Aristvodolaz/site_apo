@@ -113,12 +113,15 @@ export default function Home() {
                       <i className="bi bi-arrow-right-circle ms-2"></i>
                     </a>
                   </Link>
-                  <Link href="/about/history" legacyBehavior>
-                    <a className="btn btn-outline-light btn-lg hero-btn-secondary">
-                      <span>Узнать больше</span>
-                      <i className="bi bi-info-circle ms-2"></i>
-                    </a>
-                  </Link>
+                  <a 
+                    href="https://t.me/ArctolympBot" 
+                    className="btn btn-outline-light btn-lg hero-btn-secondary"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span>Узнать свой номер участника</span>
+                    <i className="bi bi-telegram ms-2"></i>
+                  </a>
                 </div>
               </div>
             </div>
