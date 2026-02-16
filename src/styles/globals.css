@@ -5670,3 +5670,83 @@ footer {
     transform: translateY(0);
   }
 }
+
+/* Protocol Cards Styles */
+.protocol-card {
+  transition: all 0.3s ease;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.protocol-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+.protocol-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(5, 89, 185, 0.1), rgba(0, 198, 255, 0.1));
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.protocol-card:hover .protocol-icon {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, rgba(5, 89, 185, 0.2), rgba(0, 198, 255, 0.2));
+}
+
+.protocol-card .btn {
+  transition: all 0.3s ease;
+  font-weight: 600;
+  border-radius: 0.75rem;
+}
+
+.protocol-card .btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.protocol-card .btn-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border: none;
+}
+
+.protocol-card .btn-success:hover {
+  background: linear-gradient(135deg, #218838, #1ba87e);
+}
+
+.protocol-card .btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  border: none;
+}
+
+.protocol-card .btn-primary:hover {
+  background: linear-gradient(135deg, var(--primary-hover), #0095ff);
+}
+
+.protocol-card .btn-info {
+  background: linear-gradient(135deg, #17a2b8, #20c9e0);
+  border: none;
+  color: white;
+}
+
+.protocol-card .btn-info:hover {
+  background: linear-gradient(135deg, #138496, #1ab0c8);
+  color: white;
+}
+
+.protocol-card .btn-warning {
+  background: linear-gradient(135deg, #ffc107, #ffdb4d);
+  border: none;
+  color: #212529;
+}
+
+.protocol-card .btn-warning:hover {
+  background: linear-gradient(135deg, #e0a800, #e6c43e);
+  color: #212529;
+}

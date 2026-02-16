@@ -144,6 +144,111 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Protocols Section */}
+      <section className="py-5 bg-light">
+        <div className="container">
+          <div className="row mb-4">
+            <div className="col-12 text-center">
+              <h2 className="section-heading mb-3">
+                <i className="bi bi-file-earmark-text text-primary me-2"></i>
+                Протоколы отборочного этапа
+              </h2>
+              <p className="lead text-muted">Общие протоколы по предметам</p>
+            </div>
+          </div>
+          
+          <div className="row g-4 justify-content-center">
+            {/* Math Protocol */}
+            <div className="col-md-6 col-lg-3">
+              <div className="card h-100 shadow-sm border-0 protocol-card">
+                <div className="card-body p-4 text-center">
+                  <div className="protocol-icon mb-3">
+                    <i className="bi bi-calculator-fill text-info" style={{ fontSize: '3rem' }}></i>
+                  </div>
+                  <h3 className="h4 mb-3">Математика</h3>
+                  <p className="text-muted mb-4">Общий протокол отборочного этапа по математике</p>
+                  <a 
+                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Математика.pdf" 
+                    className="btn btn-info btn-lg w-100"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="bi bi-download me-2"></i>
+                    Скачать протокол
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Physics Protocol */}
+            <div className="col-md-6 col-lg-3">
+              <div className="card h-100 shadow-sm border-0 protocol-card">
+                <div className="card-body p-4 text-center">
+                  <div className="protocol-icon mb-3">
+                    <i className="bi bi-lightning-charge-fill text-primary" style={{ fontSize: '3rem' }}></i>
+                  </div>
+                  <h3 className="h4 mb-3">Физика</h3>
+                  <p className="text-muted mb-4">Общий протокол отборочного этапа по физике</p>
+                  <a 
+                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Физика.pdf" 
+                    className="btn btn-primary btn-lg w-100"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="bi bi-download me-2"></i>
+                    Скачать протокол
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Chemistry Protocol */}
+            <div className="col-md-6 col-lg-3">
+              <div className="card h-100 shadow-sm border-0 protocol-card">
+                <div className="card-body p-4 text-center">
+                  <div className="protocol-icon mb-3">
+                    <i className="bi bi-droplet-fill text-success" style={{ fontSize: '3rem' }}></i>
+                  </div>
+                  <h3 className="h4 mb-3">Химия</h3>
+                  <p className="text-muted mb-4">Общий протокол отборочного этапа по химии</p>
+                  <a 
+                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Химия.pdf" 
+                    className="btn btn-success btn-lg w-100"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="bi bi-download me-2"></i>
+                    Скачать протокол
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Biology Protocol */}
+            <div className="col-md-6 col-lg-3">
+              <div className="card h-100 shadow-sm border-0 protocol-card">
+                <div className="card-body p-4 text-center">
+                  <div className="protocol-icon mb-3">
+                    <i className="bi bi-flower1 text-warning" style={{ fontSize: '3rem' }}></i>
+                  </div>
+                  <h3 className="h4 mb-3">Биология</h3>
+                  <p className="text-muted mb-4">Общий протокол отборочного этапа по биологии</p>
+                  <a 
+                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Биология.pdf" 
+                    className="btn btn-warning btn-lg w-100"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <i className="bi bi-download me-2"></i>
+                    Скачать протокол
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section className="py-5">
         <div className="container">

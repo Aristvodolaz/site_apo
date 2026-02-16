@@ -8,38 +8,66 @@ import {
   query,
   orderBy,
   where,
-  serverTimestamp
+  serverTimestamp,
+  runTransaction
 } from 'firebase/firestore';
 
-// Функция для генерации следующего доступного ID участника
+// Функция для генерации следующего доступного ID участника с использованием транзакции
 export const generateNextParticipantId = async () => {
   try {
     const currentYear = new Date().getFullYear();
     const yearPrefix = `APO-${currentYear}-`;
+    const counterDocRef = doc(db, 'counters', `participantId_${currentYear}`);
     
-    // Получаем все регистрации текущего года
-    const registrationsRef = collection(db, 'registrations');
-    const q = query(
-      registrationsRef,
-      where('participantId', '>=', yearPrefix),
-      where('participantId', '<', `APO-${currentYear + 1}-`),
-      orderBy('participantId', 'desc')
-    );
+    // Используем транзакцию для атомарного инкремента счётчика
+    const newParticipantId = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterDocRef);
+      
+      let nextNumber;
+      if (!counterDoc.exists()) {
+        // Если счётчик для этого года не существует, инициализируем его
+        // Проверяем существующие ID в базе для определения начального значения
+        const registrationsRef = collection(db, 'registrations');
+        const q = query(
+          registrationsRef,
+          where('participantId', '>=', yearPrefix),
+          where('participantId', '<', `APO-${currentYear + 1}-`),
+          orderBy('participantId', 'desc')
+        );
+        
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          nextNumber = 1;
+        } else {
+          // Получаем максимальный существующий номер
+          const lastId = snapshot.docs[0].data().participantId;
+          const lastNumber = parseInt(lastId.split('-')[2]);
+          nextNumber = lastNumber + 1;
+        }
+        
+        // Создаём новый счётчик
+        transaction.set(counterDocRef, { 
+          currentNumber: nextNumber,
+          year: currentYear,
+          updatedAt: serverTimestamp()
+        });
+      } else {
+        // Инкрементируем существующий счётчик
+        const currentNumber = counterDoc.data().currentNumber || 0;
+        nextNumber = currentNumber + 1;
+        transaction.update(counterDocRef, { 
+          currentNumber: nextNumber,
+          updatedAt: serverTimestamp()
+        });
+      }
+      
+      // Форматируем ID с ведущими нулями (5 цифр)
+      const formattedNumber = nextNumber.toString().padStart(5, '0');
+      return `${yearPrefix}${formattedNumber}`;
+    });
     
-    const snapshot = await getDocs(q);
-    
-    if (snapshot.empty) {
-      // Если нет регистраций в этом году, начинаем с 00001
-      return `${yearPrefix}00001`;
-    }
-    
-    // Получаем последний использованный номер
-    const lastId = snapshot.docs[0].data().participantId;
-    const lastNumber = parseInt(lastId.split('-')[2]);
-    
-    // Генерируем следующий номер
-    const nextNumber = (lastNumber + 1).toString().padStart(5, '0');
-    return `${yearPrefix}${nextNumber}`;
+    return newParticipantId;
   } catch (error) {
     console.error('Error generating next participant ID:', error);
     throw error;
