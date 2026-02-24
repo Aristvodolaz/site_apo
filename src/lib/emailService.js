@@ -103,17 +103,7 @@ const emailService = {
                    return names[subject];
                  }).join(', ')}</li>
                </ul>
-               <div style="margin-top: 20px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #666;">
-                 <p style="margin: 0;">
-                   <strong>Важно:</strong> Сохраните ваш номер участника (${userData.participantId}). 
-                   Он будет необходим для:
-                 </p>
-                 <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-                   <li>Идентификации на олимпиаде</li>
-                   <li>Получения результатов</li>
-                   <li>Обращения в службу поддержки</li>
-                 </ul>
-               </div>
+          
             </div>
             <p style="font-size: 16px; line-height: 1.6;">
               Спасибо, что выбрали нас! Пусть этот путь будет чистым и светлым, как арктический лёд. ❄️
