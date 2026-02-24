@@ -23,6 +23,7 @@ export default function RegistrationForm() {
     region: '',
     locality: '',
     school: '',
+    grade: '',
     subjects: [],
     subjectVenues: { math: '', biology: '', physics: '', chemistry: '' },
   });
@@ -47,7 +48,7 @@ export default function RegistrationForm() {
   useEffect(() => {
     const step1 = formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && !emailError;
     const step1Id = formData.isWinnerOrPrize || formData.participantId.trim();
-    const step2 = formData.region && formData.locality.trim() && formData.school.trim();
+    const step2 = formData.region && formData.locality.trim() && formData.school.trim() && formData.grade;
     const step3 = formData.subjects.length > 0;
     const step4 = formData.subjects.every((s) => (formData.subjectVenues[s] || '').trim() !== '');
     const p = [step1 && step1Id, step2, step3, step4].filter(Boolean).length;
@@ -62,7 +63,7 @@ export default function RegistrationForm() {
         return base && idOk;
       }
       case 2:
-        return formData.region !== '' && formData.locality.trim() !== '' && formData.school.trim() !== '';
+        return formData.region !== '' && formData.locality.trim() !== '' && formData.school.trim() !== '' && formData.grade !== '';
       case 3:
         return formData.subjects.length > 0;
       case 4:
@@ -155,6 +156,7 @@ export default function RegistrationForm() {
     if (!formData.region) return 'Выберите регион';
     if (!formData.locality.trim()) return 'Введите населённый пункт';
     if (!formData.school.trim()) return 'Введите название ОУ';
+    if (!formData.grade) return 'Выберите класс';
     if (formData.subjects.length === 0) return 'Выберите хотя бы один предмет';
     for (const s of formData.subjects) {
       if (!(formData.subjectVenues[s] || '').trim()) return `Выберите площадку для предмета «${SUBJECT_NAMES[s]}»`;
@@ -196,6 +198,7 @@ export default function RegistrationForm() {
         region: formData.region,
         locality: formData.locality.trim(),
         school: formData.school.trim(),
+        grade: formData.grade,
         subjects: formData.subjects,
         subjectVenues: formData.subjects.reduce((acc, s) => {
           acc[s] = (formData.subjectVenues[s] || '').trim();
@@ -220,6 +223,7 @@ export default function RegistrationForm() {
               lastName: formData.lastName,
               email: formData.email,
               school: formData.school,
+              grade: formData.grade,
               region: formData.region,
               locality: formData.locality,
               subjects: formData.subjects,
@@ -242,6 +246,7 @@ export default function RegistrationForm() {
         region: '',
         locality: '',
         school: '',
+        grade: '',
         subjects: [],
         subjectVenues: { math: '', biology: '', physics: '', chemistry: '' },
       });
@@ -424,6 +429,15 @@ export default function RegistrationForm() {
                       <div className="col-12">
                         <label htmlFor="school" className="form-label">Название ОУ <span className="text-danger">*</span></label>
                         <input type="text" className="form-control form-control-lg rounded-3" id="school" name="school" value={formData.school} onChange={handleChange} required placeholder="Например: МБОУ СОШ №1" />
+                      </div>
+                      <div className="col-12">
+                        <label htmlFor="grade" className="form-label">Класс <span className="text-danger">*</span></label>
+                        <select className="form-select form-select-lg rounded-3" id="grade" name="grade" value={formData.grade} onChange={handleChange} required>
+                          <option value="">Выберите класс</option>
+                          {['4', '5', '6', '7', '8', '9', '10', '11'].map((g) => (
+                            <option key={g} value={g}>{g} класс</option>
+                          ))}
+                        </select>
                       </div>
                     </div>
                   </div>
