@@ -1,28 +1,32 @@
 import { useState, useEffect } from 'react';
 import { regionsData } from '../data/regionsData';
+import { getVenuesForSubject } from '../data/venuesData';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { generateNextParticipantId } from '../lib/dataService';
+
+const SUBJECT_IDS = ['math', 'biology', 'physics', 'chemistry'];
+const SUBJECT_NAMES = { math: 'Математика', biology: 'Биология', physics: 'Физика', chemistry: 'Химия' };
+const SUBJECT_COLORS = { math: 'primary', biology: 'success', physics: 'warning', chemistry: 'danger' };
+const SUBJECT_ICONS = { math: 'calculator', biology: 'tree', physics: 'lightning', chemistry: 'droplet' };
+
+const STAGE_REGISTRATIONS = 'stage_registrations';
 
 export default function RegistrationForm() {
   const [formData, setFormData] = useState({
-    firstName: '',
+    isWinnerOrPrize: false,
     lastName: '',
+    firstName: '',
     middleName: '',
     email: '',
-    school: '',
+    participantId: '',
     region: '',
-    city: '',
-    customRegion: '',
-    customCity: '',
-    customCountry: '',
-    grade: '',
+    locality: '',
+    school: '',
     subjects: [],
+    subjectVenues: { math: '', biology: '', physics: '', chemistry: '' },
   });
-  
-  const [useCustomLocation, setUseCustomLocation] = useState(false);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -31,59 +35,43 @@ export default function RegistrationForm() {
   const [showEmailRequired, setShowEmailRequired] = useState(false);
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [isHovered, setIsHovered] = useState(null);
   const [formProgress, setFormProgress] = useState(0);
 
-  // Обработчик клика по предмету
-  const handleSubjectClick = (subject) => {
-    setFormData(prev => ({
-      ...prev,
-      subjects: prev.subjects.includes(subject)
-        ? prev.subjects.filter(s => s !== subject)
-        : [...prev.subjects, subject]
-    }));
-  };
-
-  // Анимация для появления элементов
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
-    transition: { duration: 0.3 }
+    transition: { duration: 0.3 },
   };
 
-  // Вычисление прогресса заполнения формы
   useEffect(() => {
-    const requiredFields = ['firstName', 'lastName', 'email', 'school', 'region', 'city', 'grade'];
-    const filledFields = requiredFields.filter(field => formData[field].trim() !== '').length;
-    const subjectsProgress = formData.subjects.length > 0 ? 1 : 0;
-    const progress = ((filledFields + subjectsProgress) / (requiredFields.length + 1)) * 100;
-    setFormProgress(progress);
-  }, [formData]);
+    const step1 = formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && !emailError;
+    const step1Id = formData.isWinnerOrPrize || formData.participantId.trim();
+    const step2 = formData.region && formData.locality.trim() && formData.school.trim();
+    const step3 = formData.subjects.length > 0;
+    const step4 = formData.subjects.every((s) => (formData.subjectVenues[s] || '').trim() !== '');
+    const p = [step1 && step1Id, step2, step3, step4].filter(Boolean).length;
+    setFormProgress((p / 4) * 100);
+  }, [formData, emailError]);
 
-  // Проверка валидности текущего шага
   const isStepValid = (step) => {
-    switch(step) {
-      case 1:
-        return formData.firstName.trim() !== '' && 
-               formData.lastName.trim() !== '' && 
-               formData.email.trim() !== '' &&
-               !emailError;
+    switch (step) {
+      case 1: {
+        const base = formData.firstName.trim() !== '' && formData.lastName.trim() !== '' && formData.email.trim() !== '' && !emailError;
+        const idOk = formData.isWinnerOrPrize || (formData.participantId || '').trim() !== '';
+        return base && idOk;
+      }
       case 2:
-        const locationValid = useCustomLocation 
-          ? (formData.customRegion.trim() !== '' && formData.customCity.trim() !== '')
-          : (formData.region !== '' && formData.city !== '');
-        return formData.school.trim() !== '' && 
-               locationValid && 
-               formData.grade !== '';
+        return formData.region !== '' && formData.locality.trim() !== '' && formData.school.trim() !== '';
       case 3:
         return formData.subjects.length > 0;
+      case 4:
+        return formData.subjects.every((s) => (formData.subjectVenues[s] || '').trim() !== '');
       default:
         return true;
     }
   };
 
-  // Обработчик перехода между шагами
   const handleStepChange = (direction) => {
     if (direction === 'next') {
       if (currentStep === 1 && formData.email.trim() === '') {
@@ -92,239 +80,181 @@ export default function RegistrationForm() {
       }
       if (isStepValid(currentStep)) {
         setShowEmailRequired(false);
-        setCurrentStep(prev => Math.min(prev + 1, 3));
+        setCurrentStep((prev) => Math.min(prev + 1, 4));
       }
-    } else if (direction === 'prev') {
+    } else {
       setShowEmailRequired(false);
-      setCurrentStep(prev => Math.max(prev - 1, 1));
+      setCurrentStep((prev) => Math.max(prev - 1, 1));
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
     if (name === 'email') {
       setEmailError(null);
       setShowEmailRequired(false);
-      // Отменяем предыдущий таймаут, если он существует
-      if (emailCheckTimeout) {
-        clearTimeout(emailCheckTimeout);
-      }
-      
-      // Устанавливаем новый таймаут для проверки email
+      if (emailCheckTimeout) clearTimeout(emailCheckTimeout);
       if (value.trim() !== '') {
-        const newTimeout = setTimeout(async () => {
+        const t = setTimeout(async () => {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (emailRegex.test(value)) {
             try {
               const exists = await checkEmailExists(value);
-              if (exists) {
-                setEmailError('Этот email уже зарегистрирован');
-              }
-            } catch (error) {
-              console.error('Ошибка при проверке email:', error);
+              if (exists) setEmailError('Этот email уже зарегистрирован');
+            } catch (err) {
+              console.error('Ошибка при проверке email:', err);
             }
           }
-        }, 500); // Проверяем через 500мс после последнего ввода
-        setEmailCheckTimeout(newTimeout);
+        }, 500);
+        setEmailCheckTimeout(t);
       }
     }
-
-    // Обработка переключения режима местоположения
-    if (name === 'locationMode') {
-      if (value === 'custom') {
-        setUseCustomLocation(true);
-        // Очищаем поля выбора из списка
-        setFormData(prev => ({
-          ...prev,
-          region: '',
-          city: ''
-        }));
-      } else {
-        setUseCustomLocation(false);
-        // Очищаем поля свободного ввода
-        setFormData(prev => ({
-          ...prev,
-          customRegion: '',
-          customCity: '',
-          customCountry: ''
-        }));
-      }
+    if (name === 'region') {
+      setFormData((prev) => ({ ...prev, [name]: value }));
       return;
     }
-
-    if (name === 'region') {
-      setFormData({
-        ...formData,
-        [name]: value,
-        city: ''
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
+    if (name.startsWith('venue_')) {
+      const sub = name.replace('venue_', '');
+      setFormData((prev) => ({
+        ...prev,
+        subjectVenues: { ...prev.subjectVenues, [sub]: value },
+      }));
+      return;
     }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleCheckboxChange = (e) => {
-    const { value, checked } = e.target;
-    if (checked) {
-      setFormData({
-        ...formData,
-        subjects: [...formData.subjects, value]
-      });
-    } else {
-      setFormData({
-        ...formData,
-        subjects: formData.subjects.filter(subject => subject !== value)
-      });
-    }
+  const handleWinnerChange = (e) => {
+    const checked = e.target.checked;
+    setFormData((prev) => ({
+      ...prev,
+      isWinnerOrPrize: checked,
+      participantId: checked ? '' : prev.participantId,
+    }));
+  };
+
+  const handleSubjectClick = (subject) => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: prev.subjects.includes(subject)
+        ? prev.subjects.filter((s) => s !== subject)
+        : [...prev.subjects, subject],
+      subjectVenues: prev.subjects.includes(subject)
+        ? { ...prev.subjectVenues, [subject]: '' }
+        : prev.subjectVenues,
+    }));
   };
 
   const validateForm = () => {
-    // Проверка обязательных полей
     if (!formData.firstName.trim()) return 'Введите имя';
     if (!formData.lastName.trim()) return 'Введите фамилию';
     if (!formData.email.trim()) return 'Введите email';
-    if (!formData.school.trim()) return 'Введите название учебного заведения';
-    // Проверка местоположения в зависимости от режима
-    if (useCustomLocation) {
-      if (!formData.customRegion.trim()) return 'Введите регион';
-      if (!formData.customCity.trim()) return 'Введите город';
-    } else {
-      if (!formData.region) return 'Выберите регион';
-      if (!formData.city) return 'Выберите город';
-    }
-    if (!formData.grade) return 'Выберите класс';
-    if (formData.subjects.length === 0) return 'Выберите хотя бы один предмет';
-
-    // Валидация email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) return 'Введите корректный email';
-
-
+    if (!formData.isWinnerOrPrize && !(formData.participantId || '').trim()) return 'Укажите Айди участника (из протоколов отборочного этапа)';
+    if (!formData.region) return 'Выберите регион';
+    if (!formData.locality.trim()) return 'Введите населённый пункт';
+    if (!formData.school.trim()) return 'Введите название ОУ';
+    if (formData.subjects.length === 0) return 'Выберите хотя бы один предмет';
+    for (const s of formData.subjects) {
+      if (!(formData.subjectVenues[s] || '').trim()) return `Выберите площадку для предмета «${SUBJECT_NAMES[s]}»`;
+    }
     return null;
   };
 
   const checkEmailExists = async (email) => {
-    const registrationsRef = collection(db, 'registrations');
-    const q = query(registrationsRef, where('email', '==', email.toLowerCase()));
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty;
+    const ref = collection(db, STAGE_REGISTRATIONS);
+    const q = query(ref, where('email', '==', email.toLowerCase()));
+    const snap = await getDocs(q);
+    return !snap.empty;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError(null);
-
-    // Проверяем валидацию
-    const validationError = validateForm();
-    if (validationError) {
-      setSubmitError(validationError);
+    const err = validateForm();
+    if (err) {
+      setSubmitError(err);
       setIsSubmitting(false);
       return;
     }
-
+    const emailExists = await checkEmailExists(formData.email);
+    if (emailExists) {
+      setSubmitError('Участник с таким email уже зарегистрирован');
+      setIsSubmitting(false);
+      return;
+    }
     try {
-      // Проверяем, существует ли уже регистрация с таким email
-      const emailExists = await checkEmailExists(formData.email);
-      if (emailExists) {
-        setSubmitError('Участник с таким email уже зарегистрирован');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Генерируем уникальный ID участника
-      const participantId = await generateNextParticipantId();
-
-      // Подготавливаем данные для сохранения
-      const dataToSave = {
-        participantId,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        middleName: formData.middleName,
-        email: formData.email.toLowerCase(), // Сохраняем email в нижнем регистре
-        school: formData.school,
-        grade: formData.grade,
+      const payload = {
+        isWinnerOrPrize: formData.isWinnerOrPrize,
+        lastName: formData.lastName.trim(),
+        firstName: formData.firstName.trim(),
+        middleName: (formData.middleName || '').trim(),
+        email: formData.email.toLowerCase(),
+        participantId: formData.isWinnerOrPrize ? '' : (formData.participantId || '').trim(),
+        region: formData.region,
+        locality: formData.locality.trim(),
+        school: formData.school.trim(),
         subjects: formData.subjects,
-        useCustomLocation: useCustomLocation,
-        // Сохраняем данные местоположения в зависимости от режима
-        ...(useCustomLocation ? {
-          region: formData.customRegion,
-          city: formData.customCity,
-          country: formData.customCountry
-        } : {
-          region: formData.region,
-          city: formData.city
-        }),
+        subjectVenues: formData.subjects.reduce((acc, s) => {
+          acc[s] = (formData.subjectVenues[s] || '').trim();
+          return acc;
+        }, {}),
         createdAt: serverTimestamp(),
         status: 'new',
-        year: new Date().getFullYear()
+        year: new Date().getFullYear(),
       };
+      const ref = collection(db, STAGE_REGISTRATIONS);
+      await addDoc(ref, payload);
 
-      // Добавляем данные в коллекцию registrations
-      const registrationsRef = collection(db, 'registrations');
-      const docRef = await addDoc(registrationsRef, dataToSave);
-      
-      // Отправляем email с подтверждением регистрации
       try {
         await fetch('/api/email/send-registration-confirmation', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: formData.email,
             userData: {
-              id: docRef.id,
-              participantId: participantId,
               firstName: formData.firstName,
               middleName: formData.middleName,
               lastName: formData.lastName,
               email: formData.email,
               school: formData.school,
-              grade: formData.grade,
+              region: formData.region,
+              locality: formData.locality,
               subjects: formData.subjects,
+              participantId: payload.participantId || null,
             },
           }),
         });
-      } catch (error) {
-        console.error('Ошибка при отправке email:', error);
-        // Не показываем ошибку пользователю, так как регистрация уже успешно завершена
+      } catch (emailErr) {
+        console.error('Ошибка отправки email:', emailErr);
       }
-      
+
       setSubmitSuccess(true);
-      
-      // Сброс формы
       setFormData({
-        firstName: '',
+        isWinnerOrPrize: false,
         lastName: '',
+        firstName: '',
         middleName: '',
         email: '',
-        school: '',
+        participantId: '',
         region: '',
-        city: '',
-        customRegion: '',
-        customCity: '',
-        customCountry: '',
-        grade: '',
+        locality: '',
+        school: '',
         subjects: [],
+        subjectVenues: { math: '', biology: '', physics: '', chemistry: '' },
       });
-      setUseCustomLocation(false);
     } catch (error) {
-      console.error('Ошибка при сохранении данных:', error);
-      setSubmitError('Произошла ошибка при отправке формы. Пожалуйста, попробуйте снова.');
+      console.error('Ошибка при сохранении:', error);
+      setSubmitError('Произошла ошибка при отправке формы. Попробуйте снова.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const grades = ['4', '5', '6', '7', '8', '9', '10', '11'];
-
   return (
-    <motion.div 
+    <motion.div
       className="card shadow-lg border-0 rounded-4"
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
@@ -332,59 +262,48 @@ export default function RegistrationForm() {
     >
       <div className="card-body p-4 p-md-5">
         {submitSuccess ? (
-          <motion.div 
+          <motion.div
             className="text-center py-5"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
             <div className="d-flex flex-column align-items-center justify-content-center mb-4">
-              <div 
+              <div
                 className="d-flex align-items-center justify-content-center mb-4"
                 style={{ width: 80, height: 80, background: '#22a3661a', borderRadius: '50%' }}
               >
                 <i className="bi bi-check-lg" style={{ color: '#22A366', fontSize: 48 }}></i>
               </div>
-              <h1 
-                className="fw-bold mb-3 d-flex align-items-center justify-content-center"
-                style={{ fontSize: '2.1rem', lineHeight: 1.2 }}
-              >
-                <span 
-                  className="me-3 d-inline-block"
-                  style={{ width: 4, height: 36, background: '#1976f6', borderRadius: 2 }}
-                ></span>
-                <span>Регистрация успешно завершена!</span>
+              <h1 className="fw-bold mb-3" style={{ fontSize: '2.1rem', lineHeight: 1.2 }}>
+                <span className="me-3 d-inline-block" style={{ width: 4, height: 36, background: '#1976f6', borderRadius: 2 }}></span>
+                Регистрация успешно завершена!
               </h1>
             </div>
-            <div className="mb-4">
-              <div className="text-muted fs-5">
-                Благодарим за регистрацию на Арктическую олимпиаду «Полярный круг».<br/>
-                Дополнительная информация была отправлена на указанный вами email.
-              </div>
+            <div className="mb-4 text-muted fs-5">
+              Благодарим за регистрацию. Дополнительная информация отправлена на указанный email.
             </div>
-            <button 
-              className="btn btn-primary btn-lg px-5 rounded-pill d-inline-flex align-items-center"
-              onClick={() => setSubmitSuccess(false)}
-            >
+            <button className="btn btn-primary btn-lg px-5 rounded-pill" onClick={() => setSubmitSuccess(false)}>
               <i className="bi bi-plus-circle me-2"></i>
-              Зарегистрировать еще участника
+              Зарегистрировать ещё участника
             </button>
           </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="needs-validation" noValidate>
-            {/* Прогресс заполнения формы */}
+            {submitError && (
+              <div className="alert alert-danger mb-4" role="alert">
+                <i className="bi bi-exclamation-triangle me-2"></i>
+                {submitError}
+              </div>
+            )}
             <div className="position-relative mb-5">
               <div className="position-absolute w-100" style={{ top: '16px' }}>
                 <div className="progress" style={{ height: '3px' }}>
-                  <motion.div
-                    className="progress-bar bg-primary"
-                    animate={{ width: `${formProgress}%` }}
-                    transition={{ duration: 0.3 }}
-                  />
+                  <motion.div className="progress-bar bg-primary" animate={{ width: `${formProgress}%` }} transition={{ duration: 0.3 }} />
                 </div>
               </div>
               <div className="position-relative w-100 d-flex justify-content-between">
-                {[1, 2, 3].map((step) => (
+                {[1, 2, 3, 4].map((step) => (
                   <motion.button
                     key={step}
                     type="button"
@@ -402,96 +321,51 @@ export default function RegistrationForm() {
             </div>
 
             <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                variants={fadeInUp}
-              >
+              <motion.div key={currentStep} initial="initial" animate="animate" exit="exit" variants={fadeInUp}>
                 {currentStep === 1 && (
                   <div className="step-content">
-                    <div className="text-center mb-5">
+                    <div className="text-center mb-4">
                       <h2 className="card-title fw-bold">Персональные данные</h2>
-                      <p className="text-muted">Шаг 1 из 3 - Основная информация</p>
+                      <p className="text-muted">Шаг 1 из 4</p>
                     </div>
 
-                    {/* Пометка о данных ребенка */}
-                    <div className="alert alert-warning d-flex align-items-start mb-4" role="alert">
-                      <i className="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                    <div className="alert alert-info d-flex align-items-start mb-4" role="alert">
+                      <i className="bi bi-info-circle-fill me-2 mt-1"></i>
                       <div>
-                        <strong>Внимание!</strong> Укажите данные ребенка, который будет участвовать в олимпиаде (ФИО и email участника).
+                        <strong>Айди участника:</strong> смотрите его в протоколах отборочного этапа на сайте. Если вы победитель или призёр прошлых лет — зарегистрируйтесь и дождитесь письма на почту с персональным Айди.
                       </div>
+                    </div>
+
+                    <div className="form-check mb-4">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        id="isWinnerOrPrize"
+                        checked={formData.isWinnerOrPrize}
+                        onChange={handleWinnerChange}
+                      />
+                      <label className="form-check-label fw-medium" htmlFor="isWinnerOrPrize">
+                        Являюсь победителем/призёром прошлых лет
+                      </label>
                     </div>
 
                     <div className="row g-4">
-                      <div className="col-12 mb-2">
-                        <h5 className="fw-bold mb-3">
-                          <i className="bi bi-person-circle me-2"></i>
-                          Персональные данные
-                        </h5>
-                      </div>
-
                       <div className="col-md-4">
-                        <label htmlFor="lastName" className="form-label">
-                          Фамилия <span className="text-danger">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control form-control-lg rounded-3"
-                          id="lastName"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleChange}
-                          required
-                          placeholder="Введите фамилию"
-                        />
+                        <label htmlFor="lastName" className="form-label">Фамилия <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control form-control-lg rounded-3" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Фамилия" />
                       </div>
-
                       <div className="col-md-4">
-                        <label htmlFor="firstName" className="form-label">
-                          Имя <span className="text-danger">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control form-control-lg rounded-3"
-                          id="firstName"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleChange}
-                          required
-                          placeholder="Введите имя"
-                        />
+                        <label htmlFor="firstName" className="form-label">Имя <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control form-control-lg rounded-3" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="Имя" />
                       </div>
-
                       <div className="col-md-4">
                         <label htmlFor="middleName" className="form-label">Отчество</label>
-                        <input
-                          type="text"
-                          className="form-control form-control-lg rounded-3"
-                          id="middleName"
-                          name="middleName"
-                          value={formData.middleName}
-                          onChange={handleChange}
-                          placeholder="Введите отчество"
-                        />
+                        <input type="text" className="form-control form-control-lg rounded-3" id="middleName" name="middleName" value={formData.middleName} onChange={handleChange} placeholder="Отчество" />
                       </div>
-
-                      <div className="col-12 mt-4 mb-2">
-                        <h5 className="fw-bold mb-3">
-                          <i className="bi bi-envelope-check me-2"></i>
-                          Контактные данные
-                        </h5>
-                      </div>
-                      
                       <div className="col-md-6">
-                        <label htmlFor="email" className="form-label">
-                          Электронная почта <span className="text-danger">*</span>
-                        </label>
+                        <label htmlFor="email" className="form-label">Почта <span className="text-danger">*</span></label>
                         <div className="input-group input-group-lg">
-                          <span className="input-group-text bg-light">
-                            <i className="bi bi-envelope"></i>
-                          </span>
+                          <span className="input-group-text bg-light"><i className="bi bi-envelope"></i></span>
                           <input
                             type="email"
                             className={`form-control rounded-end ${emailError || showEmailRequired ? 'is-invalid' : ''}`}
@@ -502,207 +376,54 @@ export default function RegistrationForm() {
                             required
                             placeholder="example@mail.ru"
                           />
-                          {emailError && (
-                            <div className="invalid-feedback">
-                              {emailError}
-                            </div>
-                          )}
-                          {showEmailRequired && !emailError && (
-                            <div className="invalid-feedback">
-                              <i className="bi bi-exclamation-circle me-1"></i>
-                              Введите электронную почту
-                            </div>
+                          {(emailError || (showEmailRequired && !emailError)) && (
+                            <div className="invalid-feedback">{emailError || 'Введите электронную почту'}</div>
                           )}
                         </div>
-                        {!showEmailRequired && !emailError && (
-                          <div className="form-text">
-                            <i className="bi bi-info-circle me-1"></i>
-                            На этот адрес будут отправлены дальнейшие инструкции
-                          </div>
-                        )}
                       </div>
-
+                      {!formData.isWinnerOrPrize && (
+                        <div className="col-md-6">
+                          <label htmlFor="participantId" className="form-label">Айди <span className="text-danger">*</span></label>
+                          <input
+                            type="text"
+                            className="form-control form-control-lg rounded-3"
+                            id="participantId"
+                            name="participantId"
+                            value={formData.participantId}
+                            onChange={handleChange}
+                            required={!formData.isWinnerOrPrize}
+                            placeholder="Из протоколов отборочного этапа"
+                          />
+                          <div className="form-text">Укажите Айди из протоколов отборочного этапа с сайта</div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
 
                 {currentStep === 2 && (
                   <div className="step-content">
-                    <div className="text-center mb-5">
-                      <h2 className="card-title fw-bold">Учебное заведение</h2>
-                      <p className="text-muted">Шаг 2 из 3 - Информация об обучении</p>
+                    <div className="text-center mb-4">
+                      <h2 className="card-title fw-bold">Регион и ОУ</h2>
+                      <p className="text-muted">Шаг 2 из 4</p>
                     </div>
-
                     <div className="row g-4">
                       <div className="col-12">
-                        <label htmlFor="school" className="form-label">
-                          Название учебного заведения <span className="text-danger">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control form-control-lg rounded-3"
-                          id="school"
-                          name="school"
-                          value={formData.school}
-                          onChange={handleChange}
-                          required
-                          placeholder="Например: МБОУ СОШ №1"
-                        />
-                      </div>
-
-                      {/* Переключатель режима ввода местоположения */}
-                      <div className="col-12">
-                        <div className="d-flex flex-column gap-2 mb-3">
-                          <div className="d-flex align-items-center gap-3">
-                            <span className="fw-medium">Режим ввода местоположения:</span>
-                            <div className="btn-group" role="group">
-                              <input
-                                type="radio"
-                                className="btn-check"
-                                name="locationMode"
-                                id="locationModeList"
-                                checked={!useCustomLocation}
-                                onChange={() => setUseCustomLocation(false)}
-                              />
-                              <label className="btn btn-outline-primary" htmlFor="locationModeList">
-                                <i className="bi bi-list-ul me-1"></i>
-                                Из списка
-                              </label>
-
-                              <input
-                                type="radio"
-                                className="btn-check"
-                                name="locationMode"
-                                id="locationModeCustom"
-                                checked={useCustomLocation}
-                                onChange={() => setUseCustomLocation(true)}
-                              />
-                              <label className="btn btn-outline-primary" htmlFor="locationModeCustom">
-                                <i className="bi bi-pencil-square me-1"></i>
-                                Свободный ввод
-                              </label>
-                            </div>
-                          </div>
-                          <div className="alert alert-info py-2 px-3 mb-0 d-flex align-items-center" style={{ fontSize: '0.9rem' }}>
-                            <i className="bi bi-info-circle me-2"></i>
-                            <span>Если вашего города нет в списке, воспользуйтесь свободным вводом</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Поля для выбора из списка */}
-                      {!useCustomLocation && (
-                        <>
-                          <div className="col-md-4">
-                            <label htmlFor="region" className="form-label">
-                          Регион <span className="text-danger">*</span>
-                        </label>
-                        <select
-                          className="form-select form-select-lg rounded-3"
-                          id="region"
-                          name="region"
-                          value={formData.region}
-                          onChange={handleChange}
-                          required
-                        >
+                        <label htmlFor="region" className="form-label">Регион <span className="text-danger">*</span></label>
+                        <select className="form-select form-select-lg rounded-3" id="region" name="region" value={formData.region} onChange={handleChange} required>
                           <option value="">Выберите регион</option>
-                          {Object.keys(regionsData).map(region => (
+                          {Object.keys(regionsData).map((region) => (
                             <option key={region} value={region}>{region}</option>
                           ))}
                         </select>
                       </div>
-
-                      <div className="col-md-4">
-                        <label htmlFor="city" className="form-label">
-                          Город <span className="text-danger">*</span>
-                        </label>
-                        <select
-                          className="form-select form-select-lg rounded-3"
-                          id="city"
-                          name="city"
-                          value={formData.city}
-                          onChange={handleChange}
-                          required
-                          disabled={!formData.region}
-                        >
-                          <option value="">Выберите город</option>
-                          {formData.region && regionsData[formData.region].map(city => (
-                            <option key={city} value={city}>{city}</option>
-                          ))}
-                        </select>
+                      <div className="col-12">
+                        <label htmlFor="locality" className="form-label">Населённый пункт <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control form-control-lg rounded-3" id="locality" name="locality" value={formData.locality} onChange={handleChange} required placeholder="Город, село, п.г.т. и т.д." />
                       </div>
-                        </>
-                      )}
-
-                      {/* Поля для свободного ввода */}
-                      {useCustomLocation && (
-                        <>
-                          <div className="col-md-4">
-                            <label htmlFor="customCountry" className="form-label">
-                              Страна
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control form-control-lg rounded-3"
-                              id="customCountry"
-                              name="customCountry"
-                              value={formData.customCountry}
-                              onChange={handleChange}
-                              placeholder="Например: Россия"
-                            />
-                          </div>
-
-                          <div className="col-md-4">
-                            <label htmlFor="customRegion" className="form-label">
-                              Регион <span className="text-danger">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control form-control-lg rounded-3"
-                              id="customRegion"
-                              name="customRegion"
-                              value={formData.customRegion}
-                              onChange={handleChange}
-                              required
-                              placeholder="Например: Московская область"
-                            />
-                          </div>
-
-                          <div className="col-md-4">
-                            <label htmlFor="customCity" className="form-label">
-                              Город <span className="text-danger">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              className="form-control form-control-lg rounded-3"
-                              id="customCity"
-                              name="customCity"
-                              value={formData.customCity}
-                              onChange={handleChange}
-                              required
-                              placeholder="Например: Москва"
-                            />
-                          </div>
-                        </>
-                      )}
-
-                      <div className="col-md-4">
-                        <label htmlFor="grade" className="form-label">
-                          Класс <span className="text-danger">*</span>
-                        </label>
-                        <select
-                          className="form-select form-select-lg rounded-3"
-                          id="grade"
-                          name="grade"
-                          value={formData.grade}
-                          onChange={handleChange}
-                          required
-                        >
-                          <option value="">Выберите класс</option>
-                          {grades.map(grade => (
-                            <option key={grade} value={grade}>{grade} класс</option>
-                          ))}
-                        </select>
+                      <div className="col-12">
+                        <label htmlFor="school" className="form-label">Название ОУ <span className="text-danger">*</span></label>
+                        <input type="text" className="form-control form-control-lg rounded-3" id="school" name="school" value={formData.school} onChange={handleChange} required placeholder="Например: МБОУ СОШ №1" />
                       </div>
                     </div>
                   </div>
@@ -710,115 +431,46 @@ export default function RegistrationForm() {
 
                 {currentStep === 3 && (
                   <div className="step-content">
-                    <div className="text-center mb-5">
+                    <div className="text-center mb-4">
                       <h2 className="card-title fw-bold">Выбор предметов</h2>
-                      <p className="text-muted">Шаг 3 из 3 - Завершение регистрации</p>
+                      <p className="text-muted">Шаг 3 из 4</p>
                     </div>
-
-                    {/* Пометка о выборе предметов */}
-                    <div className="alert alert-info d-flex align-items-start mb-4" role="alert">
-                      <i className="bi bi-info-circle-fill me-2 mt-1"></i>
-                      <div>
-                        <strong>Подсказка:</strong> Выберите сразу все предметы, в которых хотите участвовать. Повторно регистрироваться на каждый предмет не нужно — одной регистрации достаточно для участия во всех выбранных дисциплинах.
-                      </div>
-                    </div>
-
                     <div className="row g-4">
                       <div className="col-12">
                         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
-                          {['math', 'biology', 'physics', 'chemistry'].map((subject, index) => (
-                            <motion.div
-                              key={subject}
-                              className="col"
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: index * 0.1 }}
-                            >
+                          {SUBJECT_IDS.map((subject) => (
+                            <motion.div key={subject} className="col" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
                               <motion.div
                                 className="position-relative"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={() => handleSubjectClick(subject)}
                               >
-                                <div 
-                                  className={`card border-2 bg-white rounded-4`}
+                                <div
+                                  className="card border-2 bg-white rounded-4"
                                   style={{
-                                    borderColor: formData.subjects.includes(subject) 
-                                      ? `var(--bs-${getSubjectColor(subject)})` 
-                                      : 'var(--bs-gray-200)',
-                                    backgroundColor: formData.subjects.includes(subject)
-                                      ? `rgba(var(--bs-${getSubjectColor(subject)}-rgb), 0.02)`
-                                      : 'white',
+                                    borderColor: formData.subjects.includes(subject) ? `var(--bs-${SUBJECT_COLORS[subject]})` : 'var(--bs-gray-200)',
+                                    backgroundColor: formData.subjects.includes(subject) ? `rgba(var(--bs-${SUBJECT_COLORS[subject]}-rgb), 0.02)` : 'white',
                                     cursor: 'pointer',
                                     transition: 'all 0.2s ease',
-                                    minWidth: '180px'
+                                    minWidth: '180px',
                                   }}
                                 >
                                   <div className="card-body py-3 px-3 d-flex align-items-center">
-                                    <div 
-                                      className="form-check-input me-2 rounded-3 border-2 flex-shrink-0 position-relative d-flex align-items-center justify-content-center"
+                                    <div
+                                      className="form-check-input me-2 rounded-3 border-2 flex-shrink-0 d-flex align-items-center justify-content-center"
                                       style={{
-                                        width: '20px',
-                                        height: '20px',
-                                        borderColor: formData.subjects.includes(subject)
-                                          ? `var(--bs-${getSubjectColor(subject)})`
-                                          : 'var(--bs-gray-400)',
-                                        backgroundColor: formData.subjects.includes(subject)
-                                          ? `var(--bs-${getSubjectColor(subject)})`
-                                          : 'white',
-                                        boxShadow: formData.subjects.includes(subject)
-                                          ? `0 2px 8px rgba(var(--bs-${getSubjectColor(subject)}-rgb), 0.15)`
-                                          : 'none',
-                                        transition: 'all 0.2s cubic-bezier(.4,2,.6,1)',
-                                        cursor: 'pointer',
-                                        marginTop: '0'
+                                        width: 20,
+                                        height: 20,
+                                        borderColor: formData.subjects.includes(subject) ? `var(--bs-${SUBJECT_COLORS[subject]})` : 'var(--bs-gray-400)',
+                                        backgroundColor: formData.subjects.includes(subject) ? `var(--bs-${SUBJECT_COLORS[subject]})` : 'white',
+                                        marginTop: 0,
                                       }}
                                     >
-                                      <motion.span
-                                        initial={{ scale: 0.7, opacity: 0 }}
-                                        animate={formData.subjects.includes(subject) ? { scale: 1, opacity: 1 } : { scale: 0.7, opacity: 0 }}
-                                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                                        style={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          justifyContent: 'center',
-                                          width: '100%',
-                                          height: '100%'
-                                        }}
-                                      >
-                                        {formData.subjects.includes(subject) && (
-                                          <i 
-                                            className="bi bi-check2"
-                                            style={{
-                                              color: 'white',
-                                              fontSize: '1.1rem',
-                                              fontWeight: 700,
-                                              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.10))'
-                                            }}
-                                          />
-                                        )}
-                                      </motion.span>
+                                      {formData.subjects.includes(subject) && <i className="bi bi-check2" style={{ color: 'white', fontSize: '1.1rem' }} />}
                                     </div>
-                                    <div className="d-flex align-items-center flex-grow-1 overflow-hidden">
-                                      <i 
-                                        className={`bi bi-${getSubjectIcon(subject)} me-2 flex-shrink-0`}
-                                        style={{
-                                          color: `var(--bs-${getSubjectColor(subject)})`,
-                                          fontSize: '1.1rem'
-                                        }}
-                                      />
-                                      <span 
-                                        className="fw-medium text-nowrap"
-                                        style={{
-                                          color: formData.subjects.includes(subject)
-                                            ? `var(--bs-${getSubjectColor(subject)})`
-                                            : 'var(--bs-gray-700)',
-                                          fontSize: '0.95rem'
-                                        }}
-                                      >
-                                        {getSubjectName(subject)}
-                                      </span>
-                                    </div>
+                                    <i className={`bi bi-${SUBJECT_ICONS[subject]} me-2`} style={{ color: `var(--bs-${SUBJECT_COLORS[subject]})` }} />
+                                    <span className="fw-medium">{SUBJECT_NAMES[subject]}</span>
                                   </div>
                                 </div>
                               </motion.div>
@@ -829,56 +481,63 @@ export default function RegistrationForm() {
                     </div>
                   </div>
                 )}
+
+                {currentStep === 4 && (
+                  <div className="step-content">
+                    <div className="text-center mb-4">
+                      <h2 className="card-title fw-bold">Площадка по каждому предмету</h2>
+                      <p className="text-muted">Шаг 4 из 4</p>
+                    </div>
+                    <div className="alert alert-info mb-4">
+                      <i className="bi bi-geo-alt me-2"></i>
+                      Выберите площадку для каждого выбранного предмета.
+                    </div>
+                    <div className="row g-4">
+                      {formData.subjects.map((subject) => (
+                        <div key={subject} className="col-12">
+                          <label htmlFor={`venue_${subject}`} className="form-label fw-medium">
+                            <i className={`bi bi-${SUBJECT_ICONS[subject]} me-1 text-${SUBJECT_COLORS[subject]}`}></i>
+                            {SUBJECT_NAMES[subject]} — площадка <span className="text-danger">*</span>
+                          </label>
+                          <select
+                            className="form-select form-select-lg rounded-3"
+                            id={`venue_${subject}`}
+                            name={`venue_${subject}`}
+                            value={formData.subjectVenues[subject] || ''}
+                            onChange={handleChange}
+                            required
+                          >
+                            <option value="">Выберите площадку</option>
+                            {getVenuesForSubject(subject).map((addr) => (
+                              <option key={addr} value={addr}>{addr}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </AnimatePresence>
 
             <div className="mt-5 d-flex justify-content-between">
               {currentStep > 1 && (
-                <motion.button
-                  type="button"
-                  className="btn btn-outline-primary btn-lg px-5 rounded-pill"
-                  onClick={() => handleStepChange('prev')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
+                <motion.button type="button" className="btn btn-outline-primary btn-lg px-5 rounded-pill" onClick={() => handleStepChange('prev')} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <i className="bi bi-arrow-left me-2"></i>
                   Назад
                 </motion.button>
               )}
-
-              {currentStep < 3 ? (
-                <motion.button
-                  type="button"
-                  className="btn btn-primary btn-lg px-5 rounded-pill ms-auto"
-                  onClick={() => handleStepChange('next')}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={!isStepValid(currentStep)}
-                >
-                  Далее
-                  <i className="bi bi-arrow-right ms-2"></i>
-                </motion.button>
-              ) : (
-                <motion.button
-                  type="submit"
-                  className="btn btn-primary btn-lg px-5 rounded-pill ms-auto"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={isSubmitting || !isStepValid(currentStep)}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Отправка...
-                    </>
-                  ) : (
-                    <>
-                      <i className="bi bi-send-fill me-2"></i>
-                      Завершить регистрацию
-                    </>
-                  )}
-                </motion.button>
-              )}
+              <div className="ms-auto">
+                {currentStep < 4 ? (
+                  <motion.button type="button" className="btn btn-primary btn-lg px-5 rounded-pill" onClick={() => handleStepChange('next')} disabled={!isStepValid(currentStep)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    Далее <i className="bi bi-arrow-right ms-2"></i>
+                  </motion.button>
+                ) : (
+                  <motion.button type="submit" className="btn btn-primary btn-lg px-5 rounded-pill" disabled={isSubmitting || !isStepValid(currentStep)} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    {isSubmitting ? <><span className="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Отправка...</> : <><i className="bi bi-send-fill me-2"></i>Завершить регистрацию</>}
+                  </motion.button>
+                )}
+              </div>
             </div>
           </form>
         )}
@@ -886,44 +545,3 @@ export default function RegistrationForm() {
     </motion.div>
   );
 }
-
-// Вспомогательные функции для работы с предметами
-const getSubjectColor = (subject) => {
-  const colors = {
-    math: 'primary',
-    biology: 'success',
-    physics: 'warning',
-    chemistry: 'danger'
-  };
-  return colors[subject];
-};
-
-const getSubjectIcon = (subject) => {
-  const icons = {
-    math: 'calculator',
-    biology: 'tree',
-    physics: 'lightning',
-    chemistry: 'droplet'
-  };
-  return icons[subject];
-};
-
-const getSubjectName = (subject) => {
-  const names = {
-    math: 'Математика',
-    biology: 'Биология',
-    physics: 'Физика',
-    chemistry: 'Химия'
-  };
-  return names[subject];
-};
-
-const getSubjectDescription = (subject) => {
-  const descriptions = {
-    math: 'Алгебра и геометрия',
-    biology: 'Биология и экология',
-    physics: 'Механика и электричество',
-    chemistry: 'Органическая и неорганическая'
-  };
-  return descriptions[subject];
-}; 
