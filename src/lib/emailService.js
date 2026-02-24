@@ -89,14 +89,6 @@ const emailService = {
             <div style="background: #f0f9ff; border-left: 4px solid #66ccff; padding: 16px; margin: 20px 0; border-radius: 8px;">
               <p style="margin: 0 0 8px;"><strong>Ваши данные:</strong></p>
                <ul style="margin: 0; padding-left: 20px; font-size: 15px;">
-                 <li style="margin-bottom: 12px;">
-                   <strong style="display: block; font-size: 18px; color: #1976f6; margin-bottom: 4px;">
-                     Ваш номер участника: ${userData.participantId}
-                   </strong>
-                   <span style="font-size: 13px; color: #666;">
-                     Пожалуйста, сохраните этот номер. Он потребуется для идентификации на олимпиаде.
-                   </span>
-                 </li>
                  <li>Имя: ${userData.firstName} ${userData.middleName} ${userData.lastName}</li>
                  <li>Email: ${userData.email}</li>
                  <li>Школа: ${userData.school}</li>
