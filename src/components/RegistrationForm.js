@@ -12,6 +12,26 @@ const SUBJECT_ICONS = { math: 'calculator', biology: 'tree', physics: 'lightning
 
 const STAGE_REGISTRATIONS = 'stage_registrations';
 
+// Возвращает список площадок с учётом спец. правил (Муравленко: математика, 4 класс отдельно)
+function getSubjectVenuesWithRules(subject, locality, grade) {
+  const base = getVenuesForSubject(subject);
+  if (!locality || !grade) return base;
+
+  const loc = locality.toLowerCase();
+  if (subject === 'math' && loc.includes('муравленко')) {
+    const isJunior = grade === '4';
+    const isSenior = ['5', '6', '7', '8', '9', '10', '11'].includes(grade);
+
+    const forJunior = base.find((addr) => addr.toLowerCase().includes('ул. дружбы народов'));
+    const forSenior = base.find((addr) => addr.toLowerCase().includes('ул. муравленко'));
+
+    if (isJunior && forJunior) return [forJunior];
+    if (isSenior && forSenior) return [forSenior];
+  }
+
+  return base;
+}
+
 export default function RegistrationForm() {
   const [formData, setFormData] = useState({
     isWinnerOrPrize: false,
@@ -522,7 +542,7 @@ export default function RegistrationForm() {
                             required
                           >
                             <option value="">Выберите площадку</option>
-                            {getVenuesForSubject(subject).map((addr) => (
+                            {getSubjectVenuesWithRules(subject, formData.locality, formData.grade).map((addr) => (
                               <option key={addr} value={addr}>{addr}</option>
                             ))}
                           </select>
