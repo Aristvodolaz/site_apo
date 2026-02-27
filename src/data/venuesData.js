@@ -118,18 +118,11 @@ function parseSubjectLine(line) {
   return Array.from(set);
 }
 
-// Безопасная нормализация адреса (на случай опечаток или пустых значений)
-function normalizeAddress(raw) {
-  if (!raw || typeof raw !== 'string') return '';
-  return raw.trim().replace(/\s+/g, ' ');
-}
-
 // Группировка по адресу (нормализованному): один адрес — объединённый список предметов
 function buildVenuesBySubject() {
   const byAddress = new Map(); // normalizedAddress -> Set(subjects)
   for (const row of VENUE_SUBJECT_RAW) {
-    const addr = normalizeAddress(row.address);
-    if (!addr) continue;
+    const addr = row.address.trim().replace(/\s+/g, ' ');
     const subjects = parseSubjectLine(row.subjectLine);
     if (!byAddress.has(addr)) byAddress.set(addr, new Set());
     subjects.forEach((s) => byAddress.get(addr).add(s));
@@ -155,9 +148,5 @@ export function getVenuesForSubject(subjectKey) {
 
 /** Список всех уникальных адресов (для обратной совместимости, без фильтра по предмету). */
 export const VENUES_LIST = Array.from(
-  new Set(
-    VENUE_SUBJECT_RAW
-      .map((r) => normalizeAddress(r.address))
-      .filter(Boolean)
-  )
+  new Set(VENUE_SUBJECT_RAW.map((r) => r.address.trim().replace(/\s+/g, ' ')))
 );

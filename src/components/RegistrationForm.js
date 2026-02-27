@@ -67,7 +67,7 @@ export default function RegistrationForm() {
 
   useEffect(() => {
     const step1 = formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && !emailError;
-    const step1Id = formData.isWinnerOrPrize || (formData.participantId || '').trim();
+    const step1Id = formData.isWinnerOrPrize || formData.participantId.trim();
     const step2 = formData.region && formData.locality.trim() && formData.school.trim() && formData.grade;
     const step3 = formData.subjects.length > 0;
     const step4 = formData.subjects.every((s) => (formData.subjectVenues[s] || '').trim() !== '');
