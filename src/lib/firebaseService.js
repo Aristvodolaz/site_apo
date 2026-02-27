@@ -545,6 +545,26 @@ export const organizersService = {
 };
 
 /**
+ * Сервис для работы с площадками (venues)
+ */
+export const venuesService = {
+  // Получение всех площадок
+  getAllVenues: async () => {
+    try {
+      const venuesRef = collection(db, 'venues');
+      const snapshot = await getDocs(venuesRef);
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error('Ошибка при получении площадок:', error);
+      throw error;
+    }
+  }
+};
+
+/**
  * Сервис для работы с документами
  */
 export const documentsService = {

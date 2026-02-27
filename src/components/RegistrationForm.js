@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { regionsData } from '../data/regionsData';
-import { getVenuesForSubject } from '../data/venuesData';
 import { db } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { venuesService } from '../lib/firebaseService';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SUBJECT_IDS = ['math', 'biology', 'physics', 'chemistry'];
@@ -13,8 +13,15 @@ const SUBJECT_ICONS = { math: 'calculator', biology: 'tree', physics: 'lightning
 const STAGE_REGISTRATIONS = 'stage_registrations';
 
 // Возвращает список площадок с учётом спец. правил (Муравленко: математика, 4 класс отдельно)
-function getSubjectVenuesWithRules(subject, locality, grade) {
-  const base = getVenuesForSubject(subject);
+function getSubjectVenuesWithRules(subject, locality, grade, allVenues) {
+  if (!Array.isArray(allVenues) || allVenues.length === 0) return [];
+
+  // Ожидаемый формат документа площадки: { address: string, subjects: string[] }
+  const base = allVenues
+    .filter(v => Array.isArray(v.subjects) && v.subjects.includes(subject))
+    .map(v => v.address)
+    .filter(Boolean);
+
   if (!locality || !grade) return base;
 
   const loc = locality.toLowerCase();
@@ -22,8 +29,8 @@ function getSubjectVenuesWithRules(subject, locality, grade) {
     const isJunior = grade === '4';
     const isSenior = ['5', '6', '7', '8', '9', '10', '11'].includes(grade);
 
-    const forJunior = base.find((addr) => addr.toLowerCase().includes('ул. дружбы народов'));
-    const forSenior = base.find((addr) => addr.toLowerCase().includes('ул. муравленко'));
+    const forJunior = base.find((addr) => addr.toLowerCase().includes('дружбы народов'));
+    const forSenior = base.find((addr) => addr.toLowerCase().includes('ул. муравленко') || addr.toLowerCase().includes(' муравленко, зд. 20'));
 
     if (isJunior && forJunior) return [forJunior];
     if (isSenior && forSenior) return [forSenior];
@@ -57,6 +64,8 @@ export default function RegistrationForm() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formProgress, setFormProgress] = useState(0);
+  const [venues, setVenues] = useState([]);
+  const [venuesLoading, setVenuesLoading] = useState(true);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -65,9 +74,31 @@ export default function RegistrationForm() {
     transition: { duration: 0.3 },
   };
 
+  // Загрузка площадок из Firebase
+  useEffect(() => {
+    let cancelled = false;
+    const loadVenues = async () => {
+      try {
+        const data = await venuesService.getAllVenues();
+        if (!cancelled) {
+          setVenues(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке площадок:', error);
+        if (!cancelled) setVenues([]);
+      } finally {
+        if (!cancelled) setVenuesLoading(false);
+      }
+    };
+    loadVenues();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     const step1 = formData.firstName.trim() && formData.lastName.trim() && formData.email.trim() && !emailError;
-    const step1Id = formData.isWinnerOrPrize || formData.participantId.trim();
+    const step1Id = formData.isWinnerOrPrize || (formData.participantId || '').trim();
     const step2 = formData.region && formData.locality.trim() && formData.school.trim() && formData.grade;
     const step3 = formData.subjects.length > 0;
     const step4 = formData.subjects.every((s) => (formData.subjectVenues[s] || '').trim() !== '');
@@ -526,6 +557,11 @@ export default function RegistrationForm() {
                       <i className="bi bi-geo-alt me-2"></i>
                       Выберите площадку для каждого выбранного предмета.
                     </div>
+                    {venuesLoading && (
+                      <div className="alert alert-secondary mb-4">
+                        Загружаем список площадок...
+                      </div>
+                    )}
                     <div className="row g-4">
                       {formData.subjects.map((subject) => (
                         <div key={subject} className="col-12">
@@ -542,7 +578,7 @@ export default function RegistrationForm() {
                             required
                           >
                             <option value="">Выберите площадку</option>
-                            {getSubjectVenuesWithRules(subject, formData.locality, formData.grade).map((addr) => (
+                            {getSubjectVenuesWithRules(subject, formData.locality, formData.grade, venues).map((addr) => (
                               <option key={addr} value={addr}>{addr}</option>
                             ))}
                           </select>
