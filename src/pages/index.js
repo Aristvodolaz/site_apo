@@ -291,6 +291,10 @@ export default function Home() {
               </div>
             </div>
           </div>
+          <p className="text-muted small text-center mt-3 mb-0">
+            <i className="bi bi-info-circle me-1"></i>
+            В регионах ЯНАО заключительный этап начинается в 12:00 по местному времени; при необходимости уточняйте детали у организаторов площадки.
+          </p>
         </div>
       </section>
 
