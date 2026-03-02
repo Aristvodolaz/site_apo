@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { getNews } from '../lib/dataService';
 import { subjectsService } from '../lib/firebaseService';
 import OrganizersAndPartners from '../components/OrganizersAndPartners';
+import { FINAL_STAGE_SCHEDULE } from '../data/finalStageScheduleData';
 
 export default function Home() {
   // Statistics data
@@ -245,6 +246,48 @@ export default function Home() {
                     Скачать протокол
                   </a>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Время проведения заключительного этапа по регионам */}
+      <section className="py-5 bg-white">
+        <div className="container">
+          <div className="row mb-4">
+            <div className="col-12 text-center">
+              <h2 className="section-heading mb-3">
+                <i className="bi bi-clock-history text-primary me-2"></i>
+                Время проведения заключительного этапа по регионам
+              </h2>
+            </div>
+          </div>
+          <div className="row justify-content-center">
+            <div className="col-12 overflow-auto">
+              <div className="table-responsive">
+                <table className="table table-hover align-middle shadow-sm rounded overflow-hidden">
+                  <thead className="table-light">
+                    <tr>
+                      <th scope="col">Регион / город</th>
+                      <th scope="col">Площадка</th>
+                      <th scope="col">Адрес</th>
+                      <th scope="col" className="text-center text-nowrap">Время начала</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {FINAL_STAGE_SCHEDULE.map((row, index) => (
+                      <tr key={index}>
+                        <td className="fw-medium">{row.region}</td>
+                        <td>{row.institution}</td>
+                        <td className="text-muted small">{row.address}</td>
+                        <td className="text-center">
+                          <span className="badge bg-primary">{row.time}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
