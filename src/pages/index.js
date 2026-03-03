@@ -291,10 +291,19 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <p className="text-muted small text-center mt-3 mb-0">
-            <i className="bi bi-info-circle me-1"></i>
-            В регионах ЯНАО заключительный этап начинается в 12:00 по местному времени; при необходимости уточняйте детали у организаторов площадки.
-          </p>
+          <div className="mt-3 p-3 bg-light rounded small">
+            <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 gap-md-3">
+              <span className="fw-medium">Ямало-Ненецкий автономный округ</span>
+              <span className="text-muted">55 площадок</span>
+              <span className="badge bg-primary">12:00</span>
+            </div>
+            <p className="mb-0 mt-2 text-muted text-center" style={{ fontSize: '0.9em' }}>
+              г. Губкинский, г. Лабытнанги, г. Муравленко, г. Новый Уренгой, г. Ноябрьск, г. Салехард, Приуральский район, Надымский район, Пуровский район, Тазовский район, Шурышкарский район, Ямальский район
+            </p>
+            <p className="mb-0 mt-1 text-muted text-center">
+              При необходимости уточняйте детали у организаторов площадки.
+            </p>
+          </div>
         </div>
       </section>
 
