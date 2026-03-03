@@ -291,18 +291,22 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="mt-3 p-3 bg-light rounded small">
-            <div className="d-flex flex-wrap align-items-center justify-content-center gap-2 gap-md-3">
-              <span className="fw-medium">Ямало-Ненецкий автономный округ</span>
+          <div className="mt-4 mx-auto rounded-3 overflow-hidden shadow-sm border border-primary border-opacity-25" style={{ maxWidth: '720px' }}>
+            <div className="bg-primary bg-opacity-10 px-4 py-3 d-flex flex-wrap align-items-center justify-content-center gap-3">
+              <i className="bi bi-geo-alt-fill text-primary" style={{ fontSize: '1.25rem' }}></i>
+              <span className="fw-bold text-dark">Ямало-Ненецкий автономный округ</span>
               <span className="text-muted">55 площадок</span>
-              <span className="badge bg-primary">12:00</span>
+              <span className="badge bg-primary px-3 py-2">12:00</span>
             </div>
-            <p className="mb-0 mt-2 text-muted text-center" style={{ fontSize: '0.9em' }}>
-              г. Губкинский, г. Лабытнанги, г. Муравленко, г. Новый Уренгой, г. Ноябрьск, г. Салехард, Приуральский район, Надымский район, Пуровский район, Тазовский район, Шурышкарский район, Ямальский район
-            </p>
-            <p className="mb-0 mt-1 text-muted text-center">
-              При необходимости уточняйте детали у организаторов площадки.
-            </p>
+            <div className="px-4 py-3 bg-white">
+              <p className="mb-0 text-muted text-center small lh-lg">
+                г. Губкинский · г. Лабытнанги · г. Муравленко · г. Новый Уренгой · г. Ноябрьск · г. Салехард · Приуральский район · Надымский район · Пуровский район · Тазовский район · Шурышкарский район · Ямальский район
+              </p>
+              <p className="mb-0 mt-2 text-center text-muted" style={{ fontSize: '0.85rem' }}>
+                <i className="bi bi-info-circle me-1"></i>
+                При необходимости уточняйте детали у организаторов площадки.
+              </p>
+            </div>
           </div>
         </div>
       </section>
