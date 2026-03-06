@@ -272,6 +272,7 @@ export default function Home() {
                       <th scope="col">Регион / город</th>
                       <th scope="col">Площадка</th>
                       <th scope="col">Адрес</th>
+                      <th scope="col">Предметы</th>
                       <th scope="col" className="text-center text-nowrap">Время начала</th>
                     </tr>
                   </thead>
@@ -281,6 +282,7 @@ export default function Home() {
                         <td className="fw-medium">{row.region}</td>
                         <td>{row.institution}</td>
                         <td className="text-muted small">{row.address}</td>
+                        <td className="small">{row.subjects || '—'}</td>
                         <td className="text-center">
                           <span className="badge bg-primary">{row.time}</span>
                         </td>
