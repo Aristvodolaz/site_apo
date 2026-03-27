@@ -13,9 +13,9 @@ import { FINAL_STAGE_SCHEDULE } from '../data/finalStageScheduleData';
 export default function Home() {
   const finalStageWorkShowcase = [
     { title: 'Математика', icon: 'calculator-fill', colorClass: 'info', link: 'https://disk.yandex.ru/d/xrHMJz0PTcUg9w' },
-    { title: 'Физика', icon: 'lightning-charge-fill', colorClass: 'primary', link: '' },
-    { title: 'Химия', icon: 'droplet-fill', colorClass: 'success', link: '' },
-    { title: 'Биология', icon: 'flower1', colorClass: 'warning', link: '' }
+    { title: 'Физика', icon: 'lightning-charge-fill', colorClass: 'primary', link: 'https://disk.yandex.ru/d/xK23HIsRoMnP-Q' },
+    { title: 'Химия', icon: 'droplet-fill', colorClass: 'success', link: 'https://disk.yandex.ru/d/D3KwJnW8x4uemw' },
+    { title: 'Биология', icon: 'flower1', colorClass: 'warning', link: 'https://disk.yandex.ru/d/56FBoO3qcUK0Ow' }
   ];
 
   // Statistics data
