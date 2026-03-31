@@ -220,9 +220,9 @@ export default function Home() {
                     <i className="bi bi-droplet-fill text-success" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Химия</h3>
-                  <p className="text-muted mb-4">Общий протокол отборочного этапа по химии</p>
+                  <p className="text-muted mb-4">Общий протокол заключительного этапа по химии</p>
                   <a 
-                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Химия.pdf" 
+                    href="https://disk.yandex.ru/d/AF2o3o5icAQVBA" 
                     className="btn btn-success btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
