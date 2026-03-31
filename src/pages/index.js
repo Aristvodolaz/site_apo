@@ -176,7 +176,7 @@ export default function Home() {
                     <i className="bi bi-calculator-fill text-info" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Математика</h3>
-                  <p className="text-muted mb-4">Общий протокол отборочного этапа по математике</p>
+                  <p className="text-muted mb-4">Общий протокол заключительного этапа по математике</p>
                   <a 
                     href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Математика.pdf" 
                     className="btn btn-info btn-lg w-100"
@@ -198,7 +198,7 @@ export default function Home() {
                     <i className="bi bi-lightning-charge-fill text-primary" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Физика</h3>
-                  <p className="text-muted mb-4">Общий протокол отборочного этапа по физике</p>
+                  <p className="text-muted mb-4">Общий протокол заключительного этапа по физике</p>
                   <a 
                     href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Физика.pdf" 
                     className="btn btn-primary btn-lg w-100"
@@ -242,7 +242,7 @@ export default function Home() {
                     <i className="bi bi-flower1 text-warning" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Биология</h3>
-                  <p className="text-muted mb-4">Общий протокол отборочного этапа по биологии</p>
+                  <p className="text-muted mb-4">Общий протокол заключительного этапа по биологии</p>
                   <a 
                     href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Биология.pdf" 
                     className="btn btn-warning btn-lg w-100"
