@@ -178,7 +178,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Математика</h3>
                   <p className="text-muted mb-4">Общий протокол заключительного этапа по математике</p>
                   <a 
-                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Математика.pdf" 
+                    href="https://disk.yandex.ru/d/ez2HENazHOwwsw" 
                     className="btn btn-info btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -200,7 +200,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Физика</h3>
                   <p className="text-muted mb-4">Общий протокол заключительного этапа по физике</p>
                   <a 
-                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Физика.pdf" 
+                    href="https://disk.yandex.ru/i/5VsJF8yzHlOppA" 
                     className="btn btn-primary btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -222,7 +222,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Химия</h3>
                   <p className="text-muted mb-4">Общий протокол заключительного этапа по химии</p>
                   <a 
-                    href="https://disk.yandex.ru/d/AF2o3o5icAQVBA" 
+                    href="https://disk.yandex.ru/i/2wSvyhNrB3tfvg" 
                     className="btn btn-success btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -244,7 +244,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Биология</h3>
                   <p className="text-muted mb-4">Общий протокол заключительного этапа по биологии</p>
                   <a 
-                    href="https://disk.yandex.ru/d/ghuy_5HmoihhIA" 
+                    href="https://disk.yandex.ru/i/mbHq5YOj9V4uHA" 
                     className="btn btn-warning btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
