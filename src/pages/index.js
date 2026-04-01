@@ -244,7 +244,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Биология</h3>
                   <p className="text-muted mb-4">Общий протокол заключительного этапа по биологии</p>
                   <a 
-                    href="/documents/protocols/Публикация_Отборочный_этап_Общий_протокол_Биология.pdf" 
+                    href="https://disk.yandex.ru/d/ghuy_5HmoihhIA" 
                     className="btn btn-warning btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
