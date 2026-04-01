@@ -15,7 +15,7 @@ export default function Home() {
     { title: 'Математика', icon: 'calculator-fill', colorClass: 'info', link: 'https://disk.yandex.ru/d/xrHMJz0PTcUg9w' },
     { title: 'Физика', icon: 'lightning-charge-fill', colorClass: 'primary', link: 'https://disk.yandex.ru/d/xK23HIsRoMnP-Q' },
     { title: 'Химия', icon: 'droplet-fill', colorClass: 'success', link: 'https://disk.yandex.ru/d/D3KwJnW8x4uemw' },
-    { title: 'Биология', icon: 'flower1', colorClass: 'warning', link: 'https://disk.yandex.ru/d/56FBoO3qcUK0Ow' }
+    { title: 'Биология', icon: 'flower1', colorClass: 'warning', link: 'https://disk.yandex.ru/d/ghuy_5HmoihhIA' }
   ];
 
   // Statistics data
