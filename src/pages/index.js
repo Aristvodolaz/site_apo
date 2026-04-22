@@ -222,7 +222,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Химия</h3>
                   <p className="text-muted mb-4">Итоговый протокол заключительного этапа по химии</p>
                   <a 
-                    href="https://disk.yandex.ru/i/jRQHAPjY0oUbDw" 
+                    href="https://disk.yandex.ru/i/nVDqB3MKmZqFuA" 
                     className="btn btn-success btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
