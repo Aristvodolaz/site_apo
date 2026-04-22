@@ -161,7 +161,7 @@ export default function Home() {
             <div className="col-12 text-center">
               <h2 className="section-heading mb-3">
                 <i className="bi bi-file-earmark-text text-primary me-2"></i>
-                Протоколы отборочного этапа
+                Итоговые протоколы заключительного этапа
               </h2>
               <p className="lead text-muted">Общие протоколы по предметам</p>
             </div>
@@ -176,9 +176,9 @@ export default function Home() {
                     <i className="bi bi-calculator-fill text-info" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Математика</h3>
-                  <p className="text-muted mb-4">Общий протокол заключительного этапа по математике</p>
+                  <p className="text-muted mb-4">Итоговый протокол заключительного этапа по математике</p>
                   <a 
-                    href="https://disk.yandex.ru/d/ez2HENazHOwwsw" 
+                    href="https://disk.yandex.ru/i/zlxV0QfmzloCQg" 
                     className="btn btn-info btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -198,9 +198,9 @@ export default function Home() {
                     <i className="bi bi-lightning-charge-fill text-primary" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Физика</h3>
-                  <p className="text-muted mb-4">Общий протокол заключительного этапа по физике</p>
+                  <p className="text-muted mb-4">Итоговый протокол заключительного этапа по физике</p>
                   <a 
-                    href="https://disk.yandex.ru/i/5VsJF8yzHlOppA" 
+                    href="https://disk.yandex.ru/i/G0Ex6uc626URWQ" 
                     className="btn btn-primary btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -220,9 +220,9 @@ export default function Home() {
                     <i className="bi bi-droplet-fill text-success" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Химия</h3>
-                  <p className="text-muted mb-4">Общий протокол заключительного этапа по химии</p>
+                  <p className="text-muted mb-4">Итоговый протокол заключительного этапа по химии</p>
                   <a 
-                    href="https://disk.yandex.ru/i/2wSvyhNrB3tfvg" 
+                    href="https://disk.yandex.ru/i/jRQHAPjY0oUbDw" 
                     className="btn btn-success btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -242,9 +242,9 @@ export default function Home() {
                     <i className="bi bi-flower1 text-warning" style={{ fontSize: '3rem' }}></i>
                   </div>
                   <h3 className="h4 mb-3">Биология</h3>
-                  <p className="text-muted mb-4">Общий протокол заключительного этапа по биологии</p>
+                  <p className="text-muted mb-4">Итоговый протокол заключительного этапа по биологии</p>
                   <a 
-                    href="https://disk.yandex.ru/i/mbHq5YOj9V4uHA" 
+                    href="https://disk.yandex.ru/i/QXzmxm_EBgtuyw" 
                     className="btn btn-warning btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
