@@ -178,7 +178,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Математика</h3>
                   <p className="text-muted mb-4">Итоговый протокол заключительного этапа по математике</p>
                   <a 
-                    href="https://disk.yandex.ru/i/zlxV0QfmzloCQg" 
+                    href="https://disk.yandex.ru/i/ARPR1smbmtlQkQ" 
                     className="btn btn-info btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -200,7 +200,7 @@ export default function Home() {
                   <h3 className="h4 mb-3">Физика</h3>
                   <p className="text-muted mb-4">Итоговый протокол заключительного этапа по физике</p>
                   <a 
-                    href="https://disk.yandex.ru/i/G0Ex6uc626URWQ" 
+                    href="https://disk.yandex.ru/i/-tJZcTTxaHWGJQ" 
                     className="btn btn-primary btn-lg w-100"
                     target="_blank"
                     rel="noopener noreferrer"
