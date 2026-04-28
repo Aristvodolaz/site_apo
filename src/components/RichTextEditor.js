@@ -14,7 +14,8 @@ const formats = [
   'script',
   'link', 'image', 'video',
   'color', 'background',
-  'align', 'size'
+  'align', 'size',
+  'width', 'height', 'style'
 ];
 
 export default function RichTextEditor({ value, onChange }) {
@@ -101,7 +102,10 @@ export default function RichTextEditor({ value, onChange }) {
       ],
       handlers: { image: imageHandler }
     },
-    clipboard: { matchVisual: false }
+    clipboard: { matchVisual: false },
+    imageResize: {
+      modules: ['Resize', 'DisplaySize', 'Toolbar']
+    }
   }), [imageHandler]);
 
   if (!mounted) {
