@@ -1,48 +1,108 @@
 import dynamic from 'next/dynamic';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 
-// Импортируем Quill без SSR
-const ReactQuill = dynamic(() => import('react-quill'), {
+const ReactQuill = dynamic(() => import('./QuillEditorInner'), {
   ssr: false,
   loading: () => <div className="loading-editor">Загрузка редактора...</div>
 });
 
-// Конфигурация Quill
-const modules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    ['link'],
-    ['clean']
-  ]
-};
-
 const formats = [
   'header',
   'bold', 'italic', 'underline', 'strike',
-  'list', 'bullet',
-  'link'
+  'blockquote', 'code-block',
+  'list', 'bullet', 'indent',
+  'script',
+  'link', 'image', 'video',
+  'color', 'background',
+  'align', 'size'
 ];
 
 export default function RichTextEditor({ value, onChange }) {
   const [mounted, setMounted] = useState(false);
-  const [editorValue, setEditorValue] = useState(value || '');
+  const [uploading, setUploading] = useState(false);
+  const wrapperRef = useRef(null);
 
-  useEffect(() => {
-    setMounted(true);
+  // Stable refs so imageHandler doesn't need to change
+  const onChangeRef = useRef(onChange);
+  const valueRef = useRef(value);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => { valueRef.current = value; }, [value]);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  const handleChange = useCallback((content) => {
+    if (onChangeRef.current) onChangeRef.current(content || '');
   }, []);
 
-  useEffect(() => {
-    setEditorValue(value || '');
-  }, [value]);
+  const imageHandler = useCallback(() => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
 
-  const handleChange = (content) => {
-    setEditorValue(content);
-    if (onChange) {
-      onChange(content || '');
-    }
-  };
+    input.onchange = async () => {
+      const file = input.files[0];
+      if (!file) return;
+
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/admin/upload', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Ошибка загрузки изображения');
+        }
+
+        const { url } = await response.json();
+
+        // Получаем Quill-инстанс через DOM — работает независимо от ref/dynamic
+        const qlContainer = wrapperRef.current?.querySelector('.ql-container');
+        const quill = qlContainer ? window.Quill?.find(qlContainer) : null;
+
+        if (quill) {
+          const range = quill.getSelection(true);
+          const index = range ? range.index : quill.getLength();
+          quill.insertEmbed(index, 'image', url);
+          quill.setSelection(index + 1);
+        } else {
+          // Fallback: вставляем в конец
+          const current = valueRef.current || '';
+          if (onChangeRef.current) {
+            onChangeRef.current(current + `<p><img src="${url}" alt="" style="max-width:100%;height:auto;" /></p>`);
+          }
+        }
+      } catch (error) {
+        alert(`Не удалось загрузить изображение: ${error.message}`);
+      } finally {
+        setUploading(false);
+      }
+    };
+  }, []); // stable — не зависит от value/onChange
+
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'script': 'sub' }, { 'script': 'super' }],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      handlers: { image: imageHandler }
+    },
+    clipboard: { matchVisual: false }
+  }), [imageHandler]);
 
   if (!mounted) {
     return (
@@ -64,29 +124,69 @@ export default function RichTextEditor({ value, onChange }) {
   return (
     <>
       <style jsx global>{`
-        .quill {
-          height: 300px;
-          margin-bottom: 50px;
+        .quill-wrapper {
+          background-color: white;
+          border-radius: 4px;
+          position: relative;
         }
-        .ql-container {
+        .ql-toolbar.ql-snow {
+          border-radius: 4px 4px 0 0;
+          background: #f8f9fa;
+        }
+        .ql-container.ql-snow {
+          border-radius: 0 0 4px 4px;
           font-size: 16px;
           font-family: inherit;
         }
         .ql-editor {
-          min-height: 200px;
+          min-height: 400px;
+          line-height: 1.7;
         }
-        .ql-editor p {
-          margin-bottom: 1em;
+        .ql-editor p { margin-bottom: 0.8em; }
+        .ql-editor img { max-width: 100%; height: auto; border-radius: 4px; }
+        .ql-editor blockquote {
+          border-left: 4px solid #ccc;
+          margin: 0;
+          padding-left: 1em;
+          color: #666;
+        }
+        .ql-editor pre.ql-syntax {
+          background: #23272e;
+          color: #abb2bf;
+          border-radius: 4px;
+          padding: 1em;
+          font-family: monospace;
+        }
+        .upload-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(255,255,255,0.75);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          border-radius: 4px;
+          font-size: 14px;
+          color: #555;
+          gap: 8px;
         }
       `}</style>
-      <ReactQuill
-        value={editorValue}
-        onChange={handleChange}
-        modules={modules}
-        formats={formats}
-        theme="snow"
-        placeholder="Введите содержание новости..."
-      />
+      <div className="quill-wrapper" ref={wrapperRef}>
+        {uploading && (
+          <div className="upload-overlay">
+            <span className="spinner-border spinner-border-sm" role="status" />
+            Загрузка изображения...
+          </div>
+        )}
+        <ReactQuill
+          value={value || ''}
+          onChange={handleChange}
+          modules={modules}
+          formats={formats}
+          theme="snow"
+          placeholder="Введите содержание новости..."
+        />
+      </div>
     </>
   );
-} 
+}

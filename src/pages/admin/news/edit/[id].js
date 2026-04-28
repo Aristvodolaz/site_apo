@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AdminLayout from '../../../../components/admin/AdminLayout';
-import { newsData } from '../../../../data/newsData';
+import RichTextEditor from '../../../../components/RichTextEditor';
 
 export default function EditNews() {
   const router = useRouter();
@@ -13,10 +13,12 @@ export default function EditNews() {
     date: '',
     summary: '',
     content: '',
-    link: ''
+    link: '',
+    imageUrl: ''
   });
   
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -24,29 +26,69 @@ export default function EditNews() {
   useEffect(() => {
     if (!id) return;
 
-    // В реальном приложении здесь будет запрос к API
-    // На данном этапе загружаем из локальных данных
-    const newsId = parseInt(id, 10);
-    const newsItem = newsData.find(item => item.id === newsId);
-    
-    if (newsItem) {
-      setFormData({
-        title: newsItem.title,
-        date: newsItem.date,
-        summary: newsItem.summary,
-        content: newsItem.content,
-        link: newsItem.link
-      });
-    } else {
-      setError('Новость не найдена');
-    }
-    
-    setLoading(false);
+    const fetchNews = async () => {
+      try {
+        const response = await fetch(`/api/admin/news/${id}`);
+        if (!response.ok) {
+          throw new Error('Не удалось загрузить новость');
+        }
+        const data = await response.json();
+        setFormData({
+          title: data.title || '',
+          date: data.date || '',
+          summary: data.summary || '',
+          content: data.content || '',
+          link: data.link || '',
+          imageUrl: data.imageUrl || ''
+        });
+      } catch (err) {
+        console.error('Ошибка при загрузке новости:', err);
+        setError('Новость не найдена или произошла ошибка');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
   }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContentChange = (content) => {
+    setFormData(prev => ({ ...prev, content }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError('');
+
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки изображения');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, imageUrl: data.url }));
+    } catch (err) {
+      console.error('Ошибка при загрузке изображения:', err);
+      setError('Не удалось загрузить изображение');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -55,13 +97,18 @@ export default function EditNews() {
     setError('');
 
     try {
-      // В реальном приложении здесь будет запрос к API для обновления новости
-      console.log('Отправка данных:', formData);
+      const response = await fetch(`/api/admin/news/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка при обновлении новости');
+      }
       
-      // Имитация задержки запроса
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Успешное обновление
       alert('Новость успешно обновлена!');
       router.push('/admin/news');
     } catch (err) {
@@ -141,6 +188,23 @@ export default function EditNews() {
         </div>
 
         <div className="mb-3">
+          <label className="form-label">Обложка новости (главное фото)</label>
+          <input
+            type="file"
+            className="form-control"
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={uploadingImage}
+          />
+          {uploadingImage && <div className="form-text">Загрузка изображения...</div>}
+          {formData.imageUrl && (
+            <div className="mt-2">
+              <img src={formData.imageUrl} alt="Обложка" style={{ maxHeight: '200px', borderRadius: '8px' }} />
+            </div>
+          )}
+        </div>
+
+        <div className="mb-3">
           <label htmlFor="summary" className="form-label">Краткое описание</label>
           <textarea
             className="form-control"
@@ -154,19 +218,11 @@ export default function EditNews() {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="content" className="form-label">Содержание</label>
-          <textarea
-            className="form-control"
-            id="content"
-            name="content"
-            rows="10"
+          <label className="form-label">Содержание</label>
+          <RichTextEditor
             value={formData.content}
-            onChange={handleChange}
-            required
+            onChange={handleContentChange}
           />
-          <div className="form-text">
-            Поддерживается HTML-разметка для форматирования текста.
-          </div>
         </div>
 
         <div className="mb-3">
@@ -198,7 +254,7 @@ export default function EditNews() {
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={submitting}
+            disabled={submitting || uploadingImage}
           >
             {submitting ? (
               <>
@@ -219,4 +275,4 @@ export default function EditNews() {
       </form>
     </AdminLayout>
   );
-} 
+}

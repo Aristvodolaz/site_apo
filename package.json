@@ -14,10 +14,12 @@
         "send-by-subject": "node src/scripts/sendEmailBySubject.cjs"
     },
     "dependencies": {
+        "@aws-sdk/client-s3": "^3.1038.0",
         "bootstrap": "^5.3.6",
         "cookie": "^0.5.0",
         "dotenv": "^17.0.1",
         "firebase": "^11.7.3",
+        "formidable": "^3.5.4",
         "framer-motion": "^12.12.1",
         "googleapis": "^148.0.0",
         "jsonwebtoken": "^9.0.2",

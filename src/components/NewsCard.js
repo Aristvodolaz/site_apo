@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export default function NewsCard({ title, date, summary, link }) {
+export default function NewsCard({ title, date, summary, link, imageUrl }) {
   const formattedDate = new Date(date).toLocaleDateString('ru-RU', {
     day: 'numeric',
     month: 'long',
@@ -13,7 +13,12 @@ export default function NewsCard({ title, date, summary, link }) {
 
   return (
     <div className="news-card">
-      <div className="card h-100 border-0 shadow-sm">
+      <div className="card h-100 border-0 shadow-sm overflow-hidden">
+        {imageUrl && (
+          <div className="news-card-image" style={{ height: '200px', overflow: 'hidden' }}>
+            <img src={imageUrl} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
         <div className="news-card-decoration"></div>
         <div className="card-body d-flex flex-column p-4">
           <div className="d-flex justify-content-between mb-3">
@@ -47,4 +52,4 @@ export default function NewsCard({ title, date, summary, link }) {
       </div>
     </div>
   );
-} 
+}

@@ -101,11 +101,24 @@ export default function NewsArticle() {
         <div className="row">
           <div className="col-lg-8 mx-auto">
             <article>
+              {newsItem.imageUrl && (
+                <div className="mb-4 text-center">
+                  <img src={newsItem.imageUrl} alt={newsItem.title} className="img-fluid rounded" style={{ maxHeight: '400px', width: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
               <div className="mb-4">
                 <p className="lead">{newsItem.summary}</p>
               </div>
               
-              <div className="content mb-5" dangerouslySetInnerHTML={{ __html: newsItem.content }} />
+              <style>{`
+                .news-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; display: block; }
+                .news-content p { margin-bottom: 1em; line-height: 1.7; }
+                .news-content h1, .news-content h2, .news-content h3 { margin-top: 1.5em; margin-bottom: 0.5em; }
+                .news-content blockquote { border-left: 4px solid #ccc; padding-left: 1em; color: #666; margin: 1em 0; }
+                .news-content pre { background: #f4f4f4; padding: 1em; border-radius: 4px; overflow-x: auto; }
+                .news-content ul, .news-content ol { padding-left: 1.5em; margin-bottom: 1em; }
+              `}</style>
+              <div className="news-content mb-5" dangerouslySetInnerHTML={{ __html: newsItem.content }} />
               
               <div className="mt-5 pt-4 border-top">
                 <div className="d-flex justify-content-between align-items-center">

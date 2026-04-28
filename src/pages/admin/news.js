@@ -15,12 +15,14 @@ export default function NewsManagement() {
   const [filteredNews, setFilteredNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingNews, setEditingNews] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
     date: new Date().toISOString().split('T')[0],
     isPublished: true,
-    isImportant: false
+    isImportant: false,
+    imageUrl: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,6 +60,7 @@ export default function NewsManagement() {
           date,
           isPublished: Boolean(data.isPublished),
           isImportant: Boolean(data.isImportant),
+          imageUrl: data.imageUrl || '',
           createdAt: data.createdAt || null,
           updatedAt: data.updatedAt || null
         };
@@ -126,6 +129,35 @@ export default function NewsManagement() {
     }));
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+
+    const uploadData = new FormData();
+    uploadData.append('file', file);
+
+    try {
+      const response = await fetch('/api/admin/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Ошибка загрузки изображения');
+      }
+
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, imageUrl: data.url }));
+    } catch (err) {
+      console.error('Ошибка при загрузке изображения:', err);
+      alert('Не удалось загрузить изображение');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   // Создание/редактирование новости
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -138,6 +170,7 @@ export default function NewsManagement() {
         date: formData.date || new Date().toISOString().split('T')[0],
         isPublished: Boolean(formData.isPublished),
         isImportant: Boolean(formData.isImportant),
+        imageUrl: formData.imageUrl || '',
         updatedAt: new Date().toISOString()
       };
 
@@ -163,7 +196,8 @@ export default function NewsManagement() {
         content: '',
         date: new Date().toISOString().split('T')[0],
         isPublished: true,
-        isImportant: false
+        isImportant: false,
+        imageUrl: ''
       });
       setEditingNews(null);
       
@@ -210,7 +244,8 @@ export default function NewsManagement() {
       content: String(newsItem.content || ''),
       date: newsItem.date || new Date().toISOString().split('T')[0],
       isPublished: Boolean(newsItem.isPublished),
-      isImportant: Boolean(newsItem.isImportant)
+      isImportant: Boolean(newsItem.isImportant),
+      imageUrl: newsItem.imageUrl || ''
     });
     
     if (bootstrap) {
@@ -228,7 +263,8 @@ export default function NewsManagement() {
       content: '',
       date: new Date().toISOString().split('T')[0],
       isPublished: true,
-      isImportant: false
+      isImportant: false,
+      imageUrl: ''
     });
     
     if (bootstrap) {
@@ -524,7 +560,7 @@ export default function NewsManagement() {
           aria-labelledby="newsModalLabel"
           aria-hidden="true"
         >
-          <div className="modal-dialog modal-lg">
+          <div className="modal-dialog modal-xl">
             <div className="modal-content">
               <div className="modal-header py-3 px-4">
                 <h5 className="modal-title" id="newsModalLabel">
@@ -539,62 +575,91 @@ export default function NewsManagement() {
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="form-label">Заголовок</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Дата публикации</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Содержание</label>
-                    <RichTextEditor
-                      value={formData.content}
-                      onChange={handleEditorChange}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <div className="form-check">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        name="isPublished"
-                        checked={formData.isPublished}
-                        onChange={handleInputChange}
-                        id="isPublished"
-                      />
-                      <label className="form-check-label" htmlFor="isPublished">
-                        Опубликовать
-                      </label>
+                  <div className="row">
+                    <div className="col-md-8">
+                      <div className="mb-3">
+                        <label className="form-label">Заголовок</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          name="title"
+                          value={formData.title}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Содержание</label>
+                        <RichTextEditor
+                          value={formData.content}
+                          onChange={handleEditorChange}
+                        />
+                      </div>
                     </div>
-                    <div className="form-check mt-2">
-                      <input
-                        type="checkbox"
-                        className="form-check-input"
-                        name="isImportant"
-                        checked={formData.isImportant}
-                        onChange={handleInputChange}
-                        id="isImportant"
-                      />
-                      <label className="form-check-label" htmlFor="isImportant">
-                        <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                        Пометить как важную новость
-                      </label>
+                    <div className="col-md-4">
+                      <div className="mb-3">
+                        <label className="form-label">Дата публикации</label>
+                        <input
+                          type="date"
+                          className="form-control"
+                          name="date"
+                          value={formData.date}
+                          onChange={handleInputChange}
+                          required
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Обложка новости</label>
+                        <input
+                          type="file"
+                          className="form-control mb-2"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          disabled={uploadingImage}
+                        />
+                        {uploadingImage && <div className="form-text text-primary mb-2">Загрузка изображения...</div>}
+                        {formData.imageUrl && (
+                          <div className="position-relative">
+                            <img src={formData.imageUrl} alt="Обложка" className="img-fluid rounded border" />
+                            <button 
+                              type="button" 
+                              className="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
+                              onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                            >
+                              <i className="bi bi-x"></i>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="mb-3 border rounded p-3 bg-light">
+                        <div className="form-check">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            name="isPublished"
+                            checked={formData.isPublished}
+                            onChange={handleInputChange}
+                            id="isPublished"
+                          />
+                          <label className="form-check-label" htmlFor="isPublished">
+                            Опубликовать
+                          </label>
+                        </div>
+                        <div className="form-check mt-2">
+                          <input
+                            type="checkbox"
+                            className="form-check-input"
+                            name="isImportant"
+                            checked={formData.isImportant}
+                            onChange={handleInputChange}
+                            id="isImportant"
+                          />
+                          <label className="form-check-label" htmlFor="isImportant">
+                            <i className="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                            Важная новость
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -609,6 +674,7 @@ export default function NewsManagement() {
                   <button
                     type="submit"
                     className="btn btn-primary"
+                    disabled={uploadingImage}
                   >
                     {editingNews ? 'Сохранить' : 'Создать'}
                   </button>
@@ -620,4 +686,4 @@ export default function NewsManagement() {
       </Layout>
     </AdminProtected>
   );
-} 
+}

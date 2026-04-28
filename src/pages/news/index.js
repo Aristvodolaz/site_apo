@@ -131,9 +131,11 @@ export default function News() {
                   <span>Важное</span>
                 </div>
                 <div className="card border-0">
-                  <div className="featured-news-image-container">
-                    <div className="featured-news-image"></div>
-                  </div>
+                  {mainNews.imageUrl && (
+                    <div className="featured-news-image-container" style={{ height: '300px', overflow: 'hidden' }}>
+                      <img src={mainNews.imageUrl} alt={mainNews.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
                   <div className="card-body p-4 p-lg-5">
                     <div className="d-flex justify-content-between align-items-center mb-4">
                       <div className="featured-news-date">
@@ -190,6 +192,7 @@ export default function News() {
                   date={newsItem.date}
                   summary={newsItem.summary}
                   link={`/news/${newsItem.id}`}
+                  imageUrl={newsItem.imageUrl}
                 />
               </div>
             ))}

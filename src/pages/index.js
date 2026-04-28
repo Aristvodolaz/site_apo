@@ -504,6 +504,7 @@ export default function Home() {
                     date={newsItem.date}
                     summary={newsItem.summary}
                     link={`/news/${newsItem.id}`}
+                    imageUrl={newsItem.imageUrl}
                   />
                 </div>
               ))}
