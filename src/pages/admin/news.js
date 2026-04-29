@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
-import { collection, query, getDocs, doc, deleteDoc, addDoc, updateDoc, orderBy, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, doc, deleteDoc, updateDoc, orderBy, Timestamp, setDoc, deleteField } from 'firebase/firestore';
+import { getUtf8ByteLength, MAX_INLINE_NEWS_CONTENT_BYTES } from '../../lib/newsContentConstants';
 import Layout from '../../components/Layout';
 import AdminProtected from '../../components/AdminProtected';
 import Link from 'next/link';
@@ -57,6 +58,7 @@ export default function NewsManagement() {
           id: doc.id,
           title: String(data.title || ''),
           content: String(data.content || ''),
+          contentUrl: data.contentUrl || '',
           date,
           isPublished: Boolean(data.isPublished),
           isImportant: Boolean(data.isImportant),
@@ -163,10 +165,19 @@ export default function NewsManagement() {
     e.preventDefault();
     
     try {
-      // Проверяем и форматируем данные перед сохранением
+      const title = String(formData.title || '').trim();
+      if (!title) {
+        throw new Error('Заголовок новости не может быть пустым');
+      }
+
+      const rawContent = String(formData.content || '');
+      const newsRef = editingNews
+        ? doc(db, 'news', editingNews.id)
+        : doc(collection(db, 'news'));
+      const newsId = editingNews ? editingNews.id : newsRef.id;
+
       const newsData = {
-        title: String(formData.title || '').trim(),
-        content: String(formData.content || ''),
+        title,
         date: formData.date || new Date().toISOString().split('T')[0],
         isPublished: Boolean(formData.isPublished),
         isImportant: Boolean(formData.isImportant),
@@ -174,20 +185,35 @@ export default function NewsManagement() {
         updatedAt: new Date().toISOString()
       };
 
-      if (!newsData.title) {
-        throw new Error('Заголовок новости не может быть пустым');
+      // Текст больше лимита Firestore (~1 MiB на поле) сохраняем в S3
+      if (getUtf8ByteLength(rawContent) > MAX_INLINE_NEWS_CONTENT_BYTES) {
+        const uploadRes = await fetch('/api/admin/news-html-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ html: rawContent, newsId }),
+        });
+        if (!uploadRes.ok) {
+          const errJson = await uploadRes.json().catch(() => ({}));
+          throw new Error(errJson.message || 'Не удалось сохранить большой текст новости');
+        }
+        const { url } = await uploadRes.json();
+        newsData.content = '';
+        newsData.contentUrl = url;
+      } else {
+        newsData.content = rawContent;
+        if (editingNews) {
+          newsData.contentUrl = deleteField();
+        }
       }
 
       if (editingNews) {
-        // Обновление существующей новости
-        const newsRef = doc(db, 'news', editingNews.id);
         await updateDoc(newsRef, newsData);
-        console.log('Новость обновлена:', newsData);
+        console.log('Новость обновлена:', newsId);
       } else {
-        // Создание новой новости
         newsData.createdAt = new Date().toISOString();
-        const docRef = await addDoc(collection(db, 'news'), newsData);
-        console.log('Новость создана:', docRef.id);
+        await setDoc(newsRef, newsData);
+        console.log('Новость создана:', newsId);
       }
       
       // Очищаем форму и обновляем список
@@ -235,13 +261,25 @@ export default function NewsManagement() {
   };
 
   // Открытие формы редактирования
-  const handleEdit = (newsItem) => {
+  const handleEdit = async (newsItem) => {
     if (!newsItem) return;
+
+    let editorContent = String(newsItem.content || '');
+    if (newsItem.contentUrl) {
+      try {
+        const res = await fetch(`/api/news/article-html/${encodeURIComponent(newsItem.id)}`);
+        if (res.ok) {
+          editorContent = await res.text();
+        }
+      } catch (err) {
+        console.error('Не удалось загрузить текст новости для редактирования:', err);
+      }
+    }
 
     setEditingNews(newsItem);
     setFormData({
       title: String(newsItem.title || ''),
-      content: String(newsItem.content || ''),
+      content: editorContent,
       date: newsItem.date || new Date().toISOString().split('T')[0],
       isPublished: Boolean(newsItem.isPublished),
       isImportant: Boolean(newsItem.isImportant),

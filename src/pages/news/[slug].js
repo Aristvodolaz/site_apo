@@ -19,11 +19,16 @@ export default function NewsArticle() {
 
       try {
         const news = await getDocument('news', slug);
-        if (news) {
-          setNewsItem(news);
-        } else {
+        if (!news) {
           setError('Новость не найдена');
+          return;
         }
+        let bodyHtml = news.content || '';
+        if (news.contentUrl) {
+          const res = await fetch(`/api/news/article-html/${encodeURIComponent(slug)}`);
+          bodyHtml = res.ok ? await res.text() : bodyHtml;
+        }
+        setNewsItem({ ...news, content: bodyHtml });
       } catch (err) {
         console.error('Error fetching news:', err);
         setError('Ошибка при загрузке новости');

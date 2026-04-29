@@ -1,6 +1,10 @@
 import { verify } from 'jsonwebtoken';
 import cookie from 'cookie';
+import { doc, collection, setDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../../../lib/firebase';
 import { newsService } from '../../../../lib/firebaseService';
+import { uploadNewsHtmlToS3 } from '../../../../lib/uploadNewsHtml';
+import { getUtf8ByteLength, MAX_INLINE_NEWS_CONTENT_BYTES } from '../../../../lib/newsContentConstants';
 
 // Секретный ключ (должен совпадать с ключом в API аутентификации)
 const JWT_SECRET = 'your-secret-key';
@@ -16,6 +20,14 @@ const isAuthenticated = (req) => {
   } catch {
     return false;
   }
+};
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '15mb',
+    },
+  },
 };
 
 export default async function handler(req, res) {
@@ -36,10 +48,30 @@ export default async function handler(req, res) {
       }
 
     case 'POST':
-      // Создание новой новости
+      // Создание новой новости (большой HTML уходит в S3 — лимит поля Firestore ~1 MiB)
       try {
-        const newNews = await newsService.createNews(req.body);
-        return res.status(201).json(newNews);
+        if (!db) {
+          return res.status(500).json({ message: 'Firebase не настроен' });
+        }
+
+        const newsRef = doc(collection(db, 'news'));
+        const newsId = newsRef.id;
+        let payload = { ...req.body };
+        const rawContent = payload.content != null ? String(payload.content) : '';
+
+        if (getUtf8ByteLength(rawContent) > MAX_INLINE_NEWS_CONTENT_BYTES) {
+          const url = await uploadNewsHtmlToS3(newsId, rawContent);
+          payload.content = '';
+          payload.contentUrl = url;
+        }
+
+        await setDoc(newsRef, {
+          ...payload,
+          created_at: serverTimestamp(),
+          updated_at: serverTimestamp(),
+        });
+
+        return res.status(201).json({ id: newsId, ...payload });
       } catch (error) {
         console.error('Ошибка при создании новости:', error);
         return res.status(500).json({ message: 'Ошибка сервера при создании новости' });

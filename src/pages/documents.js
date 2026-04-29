@@ -3,8 +3,9 @@ import Layout from '../components/Layout';
 import PageHeader from '../components/PageHeader';
 import DocumentCard from '../components/DocumentCard';
 import { db } from '../lib/firebase';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import Head from 'next/head';
+import { documentsData, documentsPublicStaticUrls } from '../data/documentsData';
 
 export default function Documents() {
   // State for category filter
@@ -24,19 +25,31 @@ export default function Documents() {
         
         const docsRef = collection(db, 'documents');
         const snapshot = await getDocs(docsRef);
-        
-        if (snapshot.empty) {
-          setDocuments([]);
-          setLoading(false);
-          return;
-        }
-        
-        const docsArray = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-        
-        setDocuments(docsArray);
+
+        const docsArray = snapshot.empty
+          ? []
+          : snapshot.docs.map((docItem) => ({
+              id: docItem.id,
+              ...docItem.data(),
+            }));
+
+        const staticExtras = documentsData.filter(
+          (row) =>
+            documentsPublicStaticUrls.has(row.url) &&
+            !docsArray.some((d) => d.url === row.url)
+        );
+        const merged = [
+          ...docsArray,
+          ...staticExtras.map((row) => ({
+            id: `local-${row.id}`,
+            title: row.title,
+            description: row.description,
+            url: row.url,
+            category: row.category,
+          })),
+        ];
+
+        setDocuments(merged);
       } catch (err) {
         console.error("Ошибка при загрузке документов:", err);
         setError("Не удалось загрузить документы. Пожалуйста, попробуйте позже.");

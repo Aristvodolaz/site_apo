@@ -61,5 +61,33 @@ export const documentsData = [
       description: 'Подробный регламент проведения отборочного и заключительного этапов по профилю "Химия".',
       url: '/documents/chemistry_reglament_2025.pdf',
       category: 'subjects'
+    },
+    {
+      id: 10,
+      title: 'Приказ по итогам Арктической олимпиады (2026)',
+      description: 'Официальный приказ по итогам проведения Арктической олимпиады школьников «Полярный круг».',
+      url: '/documents/prikaz_po_itogam_arctic_olympiada_2026.pdf',
+      category: 'main'
+    },
+    {
+      id: 11,
+      title: 'Заключительный этап Арктической олимпиады (2026)',
+      description: 'Документ по организации заключительного этапа Арктической олимпиады школьников «Полярный круг» в 2026 учебном году.',
+      url: '/documents/arctic_olympiada_2026_zaklyuchitelnyy_etap.pdf',
+      category: 'main'
+    },
+    {
+      id: 12,
+      title: 'Календарный план Арктической олимпиады (2026)',
+      description: 'Календарный план мероприятий Арктической олимпиады школьников «Полярный круг» на 2026 год.',
+      url: '/documents/arctic_olympiada_2026_kalendarnyy_plan.pdf',
+      category: 'main'
     }
-  ]; 
+  ];
+
+/** PDF из public/documents — подмешиваются к записям Firestore на странице /documents */
+export const documentsPublicStaticUrls = new Set([
+  '/documents/prikaz_po_itogam_arctic_olympiada_2026.pdf',
+  '/documents/arctic_olympiada_2026_zaklyuchitelnyy_etap.pdf',
+  '/documents/arctic_olympiada_2026_kalendarnyy_plan.pdf',
+]); 
