@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/Layout';
 import PageHeader from '../components/PageHeader';
+import FinalStageWorkShowcaseSection from '../components/FinalStageWorkShowcaseSection';
 import WinnerWorkCard from '../components/WinnerWorkCard';
 import { winnersWorksService } from '../lib/firebaseService';
 import Head from 'next/head';
@@ -180,16 +181,15 @@ export default function Winners() {
   if (error) {
     return (
       <Layout title="Работы победителей и призеров">
+        <Head>
+          <title>Работы победителей и призеров | Арктическая олимпиада</title>
+          <meta name="description" content="Работы победителей и призеров Арктической олимпиады по математике, физике, химии и биологии" />
+        </Head>
         <PageHeader 
           title="Работы победителей и призеров" 
           subtitle="Лучшие работы участников Арктической олимпиады по всем предметам"
         />
-        <div className="container py-5">
-          <div className="alert alert-danger" role="alert">
-            <i className="bi bi-exclamation-triangle me-2"></i>
-            {error}
-          </div>
-        </div>
+        <FinalStageWorkShowcaseSection sectionClassName="py-5 bg-light" />
       </Layout>
     );
   }
@@ -205,6 +205,8 @@ export default function Winners() {
         title="Работы победителей и призеров" 
         subtitle="Лучшие работы участников Арктической олимпиады по всем предметам"
       />
+
+      <FinalStageWorkShowcaseSection sectionClassName="py-5 bg-light" />
 
       {/* Волновой эффект */}
       <div className="winners-wave-container">
