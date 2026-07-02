@@ -112,13 +112,38 @@ EOF
   
   # 4. Настройка SSL (Certbot)
   print_message "Проверка SSL сертификатов..."
+  SSL_SUCCESS=false
   if ! certbot certificates | grep -q "$DOMAIN"; then
     print_message "Генерация SSL сертификата для $DOMAIN..."
-    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email admin@$DOMAIN
+    if certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email admin@$DOMAIN; then
+      SSL_SUCCESS=true
+    else
+      print_warning "Не удалось получить SSL сертификат. Сайт будет доступен по HTTP."
+    fi
+  else
+    SSL_SUCCESS=true
   fi
 
-  # Теперь применяем полную конфигурацию с SSL
-  cp "$NGINX_CONF" /etc/nginx/sites-available/arctolymp.conf
+  if [ "$SSL_SUCCESS" = true ]; then
+    # Применяем полную конфигурацию с SSL
+    cp "$NGINX_CONF" /etc/nginx/sites-available/arctolymp.conf
+    print_message "Применена конфигурация с SSL."
+  else
+    # Оставляем HTTP конфигурацию, но проксируем на докер
+    cat > /etc/nginx/sites-available/arctolymp.conf << EOF
+server {
+    listen 80;
+    server_name arctolymp.ru www.arctolymp.ru;
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+    }
+}
+EOF
+    print_warning "Применена временная конфигурация без SSL."
+  fi
+  
   nginx -t && systemctl restart nginx
   print_message "Nginx успешно настроен и перезапущен."
 else
