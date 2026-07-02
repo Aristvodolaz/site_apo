@@ -68,11 +68,13 @@ fi
 # 2. Сборка и запуск Docker-контейнеров
 print_message "Сборка и запуск Docker-контейнеров..."
 
-# Очистка старых образов и контейнеров для освобождения места
-print_message "Очистка Docker..."
-docker system prune -f
+# Глубокая очистка Docker для освобождения места
+print_message "Глубокая очистка Docker..."
+docker system prune -a -f --volumes
 
-docker-compose build
+# Попытка сборки с использованием BuildKit для оптимизации места
+export DOCKER_BUILDKIT=1
+docker-compose build --no-cache
 docker-compose down
 docker-compose up -d
 
