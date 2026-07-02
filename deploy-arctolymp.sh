@@ -31,10 +31,28 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+# Проверка наличия необходимых инструментов
+if ! command -v docker &> /dev/null; then
+  print_error "Docker не установлен. Пожалуйста, установите его согласно инструкции server-setup-arctolymp.md"
+  exit 1
+fi
+
+if ! command -v docker-compose &> /dev/null; then
+  print_error "Docker Compose не установлен. Пожалуйста, установите его согласно инструкции server-setup-arctolymp.md"
+  exit 1
+fi
+
 # Проверка наличия .env файла
 if [ ! -f .env ]; then
-  print_error "Файл .env не найден. Создайте файл .env с необходимыми переменными."
-  exit 1
+  if [ -f .env.example ]; then
+    print_warning "Файл .env не найден. Создаю его на основе .env.example..."
+    cp .env.example .env
+    print_message "Файл .env создан. ПОЖАЛУЙСТА, ОТРЕДАКТИРУЙТЕ ЕГО ПЕРЕД ЗАПУСКОМ: nano .env"
+    exit 1
+  else
+    print_error "Файл .env не найден и шаблон .env.example отсутствует. Создайте .env вручную."
+    exit 1
+  fi
 fi
 
 print_message "Начинаем деплой для домена $DOMAIN..."
