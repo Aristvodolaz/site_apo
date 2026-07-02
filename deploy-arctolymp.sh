@@ -77,9 +77,8 @@ print_message "Сборка и запуск Docker-контейнеров..."
 print_message "Глубокая очистка Docker..."
 docker system prune -a -f --volumes
 
-# Попытка сборки с использованием BuildKit для оптимизации места
-export DOCKER_BUILDKIT=1
-docker-compose build --no-cache
+# Попытка сборки
+docker-compose build
 docker-compose down
 docker-compose up -d
 
@@ -91,36 +90,39 @@ fi
 # 3. Настройка Nginx
 print_message "Настройка Nginx..."
 if [ -f "$NGINX_CONF" ]; then
-  cp "$NGINX_CONF" /etc/nginx/sites-available/arctolymp.conf
+  # Временная конфигурация без SSL для получения сертификата
+  cat > /etc/nginx/sites-available/arctolymp.conf << EOF
+server {
+    listen 80;
+    server_name arctolymp.ru www.arctolymp.ru;
+    location /.well-known/acme-challenge/ {
+        root /var/www/letsencrypt;
+    }
+    location / {
+        return 301 https://\$host\$request_uri;
+    }
+}
+EOF
+  
+  mkdir -p /var/www/letsencrypt
   ln -sf /etc/nginx/sites-available/arctolymp.conf /etc/nginx/sites-enabled/
   rm -f /etc/nginx/sites-enabled/default
   
-  nginx -t
-  if [ $? -eq 0 ]; then
-    systemctl restart nginx
-    print_message "Nginx успешно настроен и перезапущен."
-  else
-    print_error "Ошибка в конфигурации Nginx."
-    exit 1
+  nginx -t && systemctl restart nginx
+  
+  # 4. Настройка SSL (Certbot)
+  print_message "Проверка SSL сертификатов..."
+  if ! certbot certificates | grep -q "$DOMAIN"; then
+    print_message "Генерация SSL сертификата для $DOMAIN..."
+    certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email admin@$DOMAIN
   fi
+
+  # Теперь применяем полную конфигурацию с SSL
+  cp "$NGINX_CONF" /etc/nginx/sites-available/arctolymp.conf
+  nginx -t && systemctl restart nginx
+  print_message "Nginx успешно настроен и перезапущен."
 else
   print_warning "Файл конфигурации Nginx $NGINX_CONF не найден."
-fi
-
-# 4. Настройка SSL (Certbot)
-print_message "Проверка SSL сертификатов..."
-if ! certbot certificates | grep -q "$DOMAIN"; then
-  print_message "Генерация SSL сертификата для $DOMAIN..."
-  certbot --nginx -d "$DOMAIN" -d "www.$DOMAIN" --non-interactive --agree-tos --email admin@$DOMAIN
-  
-  if [ $? -eq 0 ]; then
-    print_message "SSL сертификат успешно получен."
-    systemctl restart nginx
-  else
-    print_warning "Не удалось получить SSL сертификат. Проверьте настройки DNS и Certbot."
-  fi
-else
-  print_message "SSL сертификат для $DOMAIN уже существует."
 fi
 
 # 5. Проверка доступности
