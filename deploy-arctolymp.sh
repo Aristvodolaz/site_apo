@@ -60,6 +60,8 @@ print_message "Начинаем деплой для домена $DOMAIN..."
 # 1. Обновление кода из Git (если мы в репозитории)
 if [ -d .git ]; then
   print_message "Обновление кода из Git..."
+  # Сбрасываем локальные изменения в служебных файлах деплоя, чтобы избежать конфликтов
+  git checkout deploy-arctolymp.sh nginx-arctolymp.conf Dockerfile 2>/dev/null
   git pull
 fi
 
