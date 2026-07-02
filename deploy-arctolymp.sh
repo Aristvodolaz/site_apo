@@ -42,6 +42,11 @@ if ! command -v docker-compose &> /dev/null; then
   exit 1
 fi
 
+if ! command -v nginx &> /dev/null; then
+  print_error "Nginx не установлен. Пожалуйста, установите его: sudo apt install nginx"
+  exit 1
+fi
+
 # Проверка наличия .env файла
 if [ ! -f .env ]; then
   if [ -f .env.example ]; then
